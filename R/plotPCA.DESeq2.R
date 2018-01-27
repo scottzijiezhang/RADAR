@@ -1,0 +1,32 @@
+plotPCA.DESeq2 <- function(data,group = NULL, returnPC = FALSE){
+  if(is.null(group)){
+    colData <- data.frame(group=colnames(data))
+  }else{
+    colData <- data.frame(group=group)
+  }
+
+  rownames(colData) <- colnames(data)
+  dds <- DESeq2::DESeqDataSetFromMatrix(data,colData,design = ~group)
+  cat("Using regularized log transformation of DESeq2 to tranform data...\n")
+  rld <- DESeq2::rlog(dds)
+
+  if(returnPC){
+    PCs <- DESeq2::plotPCA(rld,intgroup = "group",returnData=TRUE)
+    return(PCs)
+  }else{
+    cat("Plot PCA using the rlog transformed data...\n")
+    DESeq2::plotPCA(rld,intgroup = "group")
+  }
+
+}
+
+plotPCAfromMatrix <- function(m,group){
+
+  pc <- prcomp(t(m))
+  pca.df <- as.data.frame(pc$x)
+  vars <- apply(pca.df ,2, var)
+  props <- 100*(vars / sum(vars) )
+  makeLab <- function(x,pc) paste0("PC",pc,": ",round(x,digits = 2),"% variance")
+  ggplot(data = pca.df,aes(PC1,PC2,label = rownames(pca.df),colour=group) )+geom_text()+ xlab(makeLab(props[1],1)) + ylab(makeLab(props[2],2))
+
+}
