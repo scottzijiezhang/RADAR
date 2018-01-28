@@ -1,13 +1,15 @@
 #' @title reportMergeBin
-#' @param stats read count mattrix
+#' @param x The RNADMethyl data list
 #' @param geneGRList GRange List of gene model from gtfToGeneModel(). Or gtf file.
 #' @param cutoff The p_value cutoff to merge the bin
-reportPoissonGammaMerge <- function(stats,
+reportPoissonGammaMerge <- function(x,
                                     geneGRList,
                                     cutoff,
                                     binSize = 50
                                     ){
 
+  stats <- x$all.est
+  
   cat("getting significant bins....\n")
 
   if("p_value" %in% colnames(stats)){

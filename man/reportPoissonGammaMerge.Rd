@@ -4,10 +4,10 @@
 \alias{reportPoissonGammaMerge}
 \title{reportMergeBin}
 \usage{
-reportPoissonGammaMerge(stats, geneGRList, cutoff, binSize = 50)
+reportPoissonGammaMerge(x, geneGRList, cutoff, binSize = 50)
 }
 \arguments{
-\item{stats}{read count mattrix}
+\item{x}{The RNADMethyl data list}
 
 \item{geneGRList}{GRange List of gene model from gtfToGeneModel(). Or gtf file.}
 
