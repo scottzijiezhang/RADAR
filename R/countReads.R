@@ -134,7 +134,7 @@ countReads<-function(
 
   colnames(reads) <- c(paste(samplenames,"input",sep = "-"),paste(samplenames,"IP",sep = "-"))
 
-  saveRDS(reads,paste(outputDir,"/m6Amonter_readCounts.RDS"))
+  saveRDS(reads,paste0(outputDir,"/m6Amonter_readCounts.RDS"))
   
   data.out <- list('reads' = reads,'binSize' = binSize,'geneModel' = geneGRList,
                    'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP,
