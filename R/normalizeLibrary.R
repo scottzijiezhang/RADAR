@@ -1,11 +1,11 @@
 #' @title normalizeLibrary
-#' @param reads Read counts matrix from countReads() function.
-#' @param samplenames A vector of Samples names. Needs to be the same as the one input to countReads()
+#' @param readsOut Read counts data list from countReads() function.
 #' @param X Study design or Grouping for the samples, should have 2 levels
 #' @export norm_lib returns the list of normalized reads, study design and gene-bin names
-normalizeLibrary <- function(reads,samplenames,X){
-  input <- reads[,1:length(samplenames)]
-  m6A <- reads[,(1+length(samplenames)):(2*length(filenames))]
+normalizeLibrary <- function(readsOut,X){
+  
+  input <- readsOut$reads[,1:length(readsOut$samplenames)]
+  m6A <- readsOut$reads[,(1+length(readsOut$samplenames)):(2*length(readsOut$samplenames))]
 
   ## split gene and bin names
   aa <- strsplit(rownames(input), ",")
@@ -24,7 +24,7 @@ normalizeLibrary <- function(reads,samplenames,X){
     gene.sum <- tapply(y,gene.name,sum)
     geneSum <- cbind(geneSum,gene.sum)
   }
-  colnames(geneSum) <- filenames
+  colnames(geneSum) <- readsOut$samplenames
 
   size.input <- DESeq2::estimateSizeFactorsForMatrix(geneSum)
 

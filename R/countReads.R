@@ -137,8 +137,8 @@ countReads<-function(
   saveRDS(reads,paste(outputDir,"/m6Amonter_readCounts.RDS"))
   
   data.out <- list('reads' = reads,'binSize' = binSize,'geneModel' = geneGRList,
-                   'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP
-                   )
+                   'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP,
+                   'samplenames' <- samplenames)
   
   return(data.out)
 }
