@@ -136,6 +136,7 @@ countReads<-function(
 
   saveRDS(reads,paste0(outputDir,"/RNADMethyl_readCounts.RDS"))
   
+  
   data.out <- list('reads' = reads,'binSize' = binSize,'geneModel' = geneGRList,
                    'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP,
                    'samplenames' = samplenames)
