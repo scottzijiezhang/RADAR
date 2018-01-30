@@ -17,7 +17,7 @@ diffIP <- function(
     if(is.null(exclude) ){ ## running default
       allY <- x$ip_adjExpr_filtered
       X <- x$X
-    }else if(exclude %in% x$samplenames){
+    }else if( all( exclude %in% x$samplenames) ){
       exc.id <- match(exclude,x$samplenames)
       allY <- x$ip_adjExpr_filtered[,-c(exc.id)]
       X <- x$X[-c(exc.id)]
@@ -70,7 +70,7 @@ diffIP <- function(
     if(is.null(exclude) ){ ## running default
       allY <- x$ip_adjExpr_filtered
       X <- x$X
-    }else if(exclude %in% x$samplenames){
+    }else if( all( exclude %in% x$samplenames) ){
       exc.id <- match(exclude,x$samplenames)
       allY <- x$ip_adjExpr_filtered[,-c(exc.id)]
       X <- x$X[-c(exc.id)]
