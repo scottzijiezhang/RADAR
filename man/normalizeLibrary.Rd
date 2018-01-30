@@ -4,12 +4,10 @@
 \alias{normalizeLibrary}
 \title{normalizeLibrary}
 \usage{
-normalizeLibrary(reads, samplenames, X)
+normalizeLibrary(readsOut, X)
 }
 \arguments{
-\item{reads}{Read counts matrix from countReads() function.}
-
-\item{samplenames}{A vector of Samples names. Needs to be the same as the one input to countReads()}
+\item{readsOut}{Read counts data list from countReads() function.}
 
 \item{X}{Study design or Grouping for the samples, should have 2 levels}
 }

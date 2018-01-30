@@ -2,23 +2,37 @@
 #' @param x The RNADMethyl data list
 #' @param Covariates Matrix of covariates to include in the PoissonGamma test. Default is NULL.
 #' @param p.adjBy The method used to adjust for the p value. Default is 'fdr'. Can be "bonferroni","BY","fdr".
+#' @param exclude Names of samples to exclude (as outlier) in the test. Default is NULL
 #' @export x The RNADMethyl data list with estimators
 diffIP <- function(
   x, 
   Covariates = NULL, # covariates
   plotPvalue = TRUE,
-  p.adjBy = "fdr" # the method to calculate adjusted p_value
+  p.adjBy = "fdr", # the method to calculate adjusted p_value
+  exclude = NULL
 ){
-  
   #### start run PoissonGamma test
   if( is.null(Covariates) ){ # run simple PoissonGamma
-    tmp <- rafalib::as.fumeric(x$X) - 1
-    names(tmp) <- x$X
-    print("The categorical variable has been converted:")
-    print(tmp)
-    X <- rafalib::as.fumeric(x$X) - 1 # convert categorical variable into numerical variable.
     
-    allY <- x$ip_adjExpr_filtered
+    if(is.null(exclude) ){ ## running default
+      allY <- x$ip_adjExpr_filtered
+      X <- x$X
+    }else if(exclude %in% x$samplenames){
+      exc.id <- match(exclude,x$samplenames)
+      allY <- x$ip_adjExpr_filtered[,-c(exc.id)]
+      X <- x$X[-c(exc.id)]
+      cat(paste0("Sample ",exclude, " has been removed from test...\n"))
+    }else{
+      stop("Samples to exclude is not in samplenames...")
+    }
+    
+    tmp <- rafalib::as.fumeric(X) - 1
+    names(tmp) <- X
+    cat("The categorical variable has been converted:\n")
+    print(tmp)
+    X <- rafalib::as.fumeric(X) - 1 # convert categorical variable into numerical variable.
+    
+    
     psi <- 10
     
     print("running PoissonGamma test at single beta mode...")
@@ -51,22 +65,36 @@ diffIP <- function(
     x <- c(x,list('all.est'=all.est))
     return(x)
     
-  } else if( !is.null(Covariates) & dim( cbind(x$X,Covariates) )[1] == length(x$X)  ){ # include covariates
+  } else if( !is.null(Covariates) & dim( cbind(X,Covariates) )[1] == length(X)  ){ # include covariates
     
-    tmp <- rafalib::as.fumeric(x$X) - 1
-    names(tmp) <- x$X
+    if(is.null(exclude) ){ ## running default
+      allY <- x$ip_adjExpr_filtered
+      X <- x$X
+    }else if(exclude %in% x$samplenames){
+      exc.id <- match(exclude,x$samplenames)
+      allY <- x$ip_adjExpr_filtered[,-c(exc.id)]
+      X <- x$X[-c(exc.id)]
+      Covariates <- Covariates[-c(exc.id),]
+      cat(paste0("Sample ",exclude, " has been removed from test...\n"))
+    }else{
+      stop("Samples to exclude is not in samplenames...")
+    }
+    
+    tmp <- rafalib::as.fumeric(X) - 1
+    names(tmp) <- X
     print("The categorical variable has been converted:")
     print(tmp)
-    X1 <- rafalib::as.fumeric(x$X) - 1 # convert categorical variable into numerical variable.
+    X1 <- rafalib::as.fumeric(X) - 1 # convert categorical variable into numerical variable.
     
     ## organize covariates
     if(!is.numeric(Covariates)){stop("Please convert covariates into numerical variables")}
+
     X.all <- cbind(X1,Covariates) # new design matrix
     colnames(X.all) <- paste("X",1:ncol(X.all),sep = "")
+    
     #design.multiBeta <- formula( paste( "log(Y+1) ~ ",paste("X.all[", rownames(X.all), sep = "",collapse = " + ")) )
     design.multiBeta <- formula( paste( "log(Y+1) ~ ",paste("X.all[,", 1:ncol(X.all),"]", sep = "",collapse = " + ")) )
     ## Run multi-beta PoissonGamma
-    allY <- x$ip_adjExpr_filtered
     psi <- 10
     
     cat("running PoissonGamma test at multi-beta mode...\n")
@@ -94,7 +122,7 @@ diffIP <- function(
     padj <- p.adjust(all1[,"p_value3"],method = p.adjBy )
     all1 <- cbind( all1, padj )
     
-    x <- c(x,list('all.est'=all1.))
+    x <- c(x,list('all.est'=all1))
     return(x)
     
   } else{ ## if Covariate is not null and not the same dimension of X, throw a error

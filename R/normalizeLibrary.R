@@ -6,7 +6,7 @@ normalizeLibrary <- function(readsOut,X){
   
   input <- readsOut$reads[,1:length(readsOut$samplenames)]
   m6A <- readsOut$reads[,(1+length(readsOut$samplenames)):(2*length(readsOut$samplenames))]
-
+  colnames(input) <- colnames(m6A) <- readsOut$samplenames
   ## split gene and bin names
   aa <- strsplit(rownames(input), ",")
   gene.name <- unlist(lapply(aa, function(x){
@@ -44,12 +44,13 @@ normalizeLibrary <- function(readsOut,X){
 
   norm.ip <-t( t(m6A)/size.enrich.deseq2 )
   sizeFactor <- data.frame(input=size.input,ip=size.enrich.deseq2)
-  norm_lib <- list('geneSum'=geneSum.norm,
-                  'norm.input'=norm.input,
-                  'norm.ip'=norm.ip,
-                  'sizeFactor'=sizeFactor,
-                  'geneBins'=geneBins,
-                  'X'=X)
+  norm_lib <- c(readsOut, list('geneSum'=round(geneSum.norm),
+                               'norm.input'=norm.input,
+                               'norm.ip'=norm.ip,
+                               'sizeFactor'=sizeFactor,
+                               'geneBins'=geneBins,
+                               'X'=X) 
+                )
 
   return(norm_lib)
 }

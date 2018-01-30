@@ -4,7 +4,8 @@
 \alias{diffIP}
 \title{diffIP}
 \usage{
-diffIP(x, Covariates = NULL, plotPvalue = TRUE, p.adjBy = "fdr")
+diffIP(x, Covariates = NULL, plotPvalue = TRUE, p.adjBy = "fdr",
+  exclude = NULL)
 }
 \arguments{
 \item{x}{The RNADMethyl data list}
@@ -12,4 +13,6 @@ diffIP(x, Covariates = NULL, plotPvalue = TRUE, p.adjBy = "fdr")
 \item{Covariates}{Matrix of covariates to include in the PoissonGamma test. Default is NULL.}
 
 \item{p.adjBy}{The method used to adjust for the p value. Default is 'fdr'. Can be "bonferroni","BY","fdr".}
+
+\item{exclude}{Names of samples to exclude (as outlier) in the test. Default is NULL}
 }

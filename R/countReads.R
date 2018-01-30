@@ -138,7 +138,7 @@ countReads<-function(
   
   data.out <- list('reads' = reads,'binSize' = binSize,'geneModel' = geneGRList,
                    'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP,
-                   'samplenames' <- samplenames)
+                   'samplenames' = samplenames)
   
   return(data.out)
 }
