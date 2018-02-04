@@ -3,13 +3,15 @@
 #' @param Covariates Matrix of covariates to include in the PoissonGamma test. Default is NULL.
 #' @param p.adjBy The method used to adjust for the p value. Default is 'fdr'. Can be "bonferroni","BY","fdr".
 #' @param exclude Names of samples to exclude (as outlier) in the test. Default is NULL
+#' @param maxPsi The cutoff value for random effect parameter Psi estimation
 #' @export x The RNADMethyl data list with estimators
 diffIP <- function(
   x, 
   Covariates = NULL, # covariates
   plotPvalue = TRUE,
   p.adjBy = "fdr", # the method to calculate adjusted p_value
-  exclude = NULL
+  exclude = NULL,
+  maxPsi = 100
 ){
   #### start run PoissonGamma test
   if( is.null(Covariates) ){ # run simple PoissonGamma
@@ -45,7 +47,7 @@ diffIP <- function(
       coef <- model1$coefficients
       mu2 <- coef[1]
       beta <- coef[2]
-      est <- try(unlist(PoissonGamma::PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1)))
+      est <- try(unlist(PoissonGamma::PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all.est <- rbind(all.est, est)
         all.id <- c(all.id, kk)
@@ -106,7 +108,7 @@ diffIP <- function(
       aa <- unlist(summary( lm( design.multiBeta ) )$coefficients[, 1])
       mu2 <- aa[1]
       beta <- aa[2:(ncol(X.all)+1 )]
-      est <- try(unlist(PoissonGamma::PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1)))
+      est <- try(unlist(PoissonGamma::PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all1 <- rbind(all1, est)
         all.id <- c(all.id, kk)
