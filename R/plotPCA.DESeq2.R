@@ -27,6 +27,8 @@ plotPCAfromMatrix <- function(m,group){
   vars <- apply(pca.df ,2, var)
   props <- 100*(vars / sum(vars) )
   makeLab <- function(x,pc) paste0("PC",pc,": ",round(x,digits = 2),"% variance")
-  ggplot(data = pca.df,aes(PC1,PC2,label = rownames(pca.df),colour=group) )+geom_text()+ xlab(makeLab(props[1],1)) + ylab(makeLab(props[2],2))
+  ggplot(data = pca.df,aes(PC1,PC2,label = rownames(pca.df),colour=group) )+geom_text()+ xlab(makeLab(props[1],1)) + ylab(makeLab(props[2],2))+
+    theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                       panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 
 }
