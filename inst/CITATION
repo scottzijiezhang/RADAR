@@ -1,0 +1,16 @@
+citEntry(entry="article",
+         title = "Modeling MeRIP-seq data with PoissonGamma to test differential methylation",
+         author = personList( as.person("Zijie Zhang"),
+                              as.person("Allen Zhu"),
+                              as.person("Chuan He"),
+                              as.person("Mengjie Chen")),
+         year = 2018,
+         journal = "Unkown",
+         doi = "",
+         volume = ,
+         issue = ,
+         pages = ,
+         textVersion = 
+         paste("", 
+               "Modeling MeRIP-seq data with PoissonGamma to test differential methylation",
+                "Guess What Biology 15(12):550 (2018)" ) )
