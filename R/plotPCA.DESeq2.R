@@ -20,9 +20,17 @@ plotPCA.DESeq2 <- function(data,group = NULL, returnPC = FALSE){
 
 }
 
-plotPCAfromMatrix <- function(m,group){
-
-  pc <- prcomp(t(m))
+#' @title plotPCAfromMatrix
+#' @param m The matrix of count data
+#' @param group The factor levels to color the samples. Should be the save number as the # of matrix columns
+#' @param loglink Logic parameter determine whether to take log of the metrix data. Default is TRUE. If your input matrix is at log scale, use FALSE.
+plotPCAfromMatrix <- function(m,group,loglink = TRUE){
+  if(loglink){
+    mm <- log(m + 1)
+  }else{
+    mm <- m 
+  }
+  pc <- prcomp(t(mm))
   pca.df <- as.data.frame(pc$x)
   vars <- apply(pca.df ,2, var)
   props <- 100*(vars / sum(vars) )

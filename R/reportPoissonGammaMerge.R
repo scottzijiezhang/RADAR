@@ -85,7 +85,7 @@ reportPoissonGammaMerge <- function(x,
                  blockCount = length(tmp),
                  blockSizes = paste(as.data.frame(tmp)[,4],collapse=","),
                  blockStarts = paste(as.data.frame(tmp)[,2] - replicate(length(tmp),geneBins$start[peak_row_id[1]]),collapse=","),
-                 logFC = min( stats[rownames(geneBins[peak_row_id[1]:peak_row_id[2],]), "beta"] ),
+                 logFC = stats[rownames(geneBins[peak_row_id[1]:peak_row_id[2],]), "beta"][which.max(abs( stats[rownames(geneBins[peak_row_id[1]:peak_row_id[2],]), "beta"] ))],
                  p_value = .fishersMethod(  stats[rownames(geneBins[peak_row_id[1]:peak_row_id[2],]), "p_value"] )
                  )
     }

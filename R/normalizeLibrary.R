@@ -25,12 +25,12 @@ normalizeLibrary <- function(readsOut,X){
     geneSum <- cbind(geneSum,gene.sum)
   }
   colnames(geneSum) <- readsOut$samplenames
-
+  
   size.input <- DESeq2::estimateSizeFactorsForMatrix(geneSum)
 
   norm.input <-t( t(input) / size.input )
   geneSum.norm <- t ( t(geneSum)/size.input)
-
+  
   ## estimate enrichment using top IP count bins
   ave.ip <- rowMeans(m6A)
   ave.top <- order(ave.ip,decreasing = T)[1:round(0.01*length(ave.ip)[1])]
@@ -51,6 +51,13 @@ normalizeLibrary <- function(readsOut,X){
                                'geneBins'=geneBins,
                                'X'=X) 
                 )
-
+  
+  par(mfrow=c(2,2))
+  boxplot(log(geneSum[rowSums(geneSum)!=0,]+1),main = "INPUT")
+  boxplot(log(geneSum.norm[rowSums(geneSum.norm)!=0,]+1),main = "Normalized INPUT")
+  boxplot(log(enrich[rowSums(enrich)!=0,]+0.1), main = "Estimated enrichment")
+  enrich.norm <- as.data.frame(norm.ip[ave.top,]/geneCounts.window[ave.top,])
+  boxplot(log(enrich.norm[rowSums(enrich.norm)!=0,]+0.1), main = "Normalized estimated enrichment")
+  par(mfrow=c(1,1))
   return(norm_lib)
 }
