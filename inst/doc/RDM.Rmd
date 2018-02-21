@@ -1,0 +1,249 @@
+---
+title: "Analyzing MeRIP-seq data with PoissonGamma"
+author: "Zijie Zhang, Chuan He, Mengjie Chen"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('RNADMethyl')`"
+abstract: >
+  A basic task in the analysis of MeRIP-seq is the detection of differentially 
+  methylated loci on the RNA. To analyze the count data of MeRIP-seq, we divide 
+  the transcript (concatenated exons of a gene) into consecutive bins and 
+  quantify the reads align to each bin. The summarized count data is in table
+  format where each row represent a loci and each column is an sample. Statistical
+  inference of changes across group, as compared to within-group variability was 
+  made for each bin. This vignette explains the use of the package RNADMethyl with
+  example data.
+  RNADMethyl package version: `r packageVersion("RNADMethyl")`
+output:
+  rmarkdown::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+vignette: >
+  %\VignetteIndexEntry{Analyzing MeRIP-seq data with RNADMethyl}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
+---
+
+```{r setup, echo=FALSE, results="hide"}
+knitr::opts_chunk$set(tidy=FALSE, cache=TRUE,
+                      dev="png",
+                      message=FALSE, error=FALSE, warning=TRUE)
+```	
+
+
+**Note:** if you use RNADMethyl in published research, please cite:
+
+> 
+> 
+> *Guess What Biology*, **15**:550.
+> [](http://dx.doi.org/10.1186/s13059-014-0550-8)
+
+Other Bioconductor packages with similar aims are
+[exomePeak](http://bioconductor.org/packages/exomePeak),
+[MeTDiff](https://github.com/compgenomics/MeTDiff)
+[QNB](https://cran.r-project.org/web/packages/QNB/index.html).
+
+## Quick start
+
+Here we show the most basic steps for a differential methylation
+analysis. There are one major steps upstream of RDM that generate 
+mapped reads in Bam files for each sample, which can be done by varies
+choices of softwares such as [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml), 
+[tophat2](http://www.ccb.jhu.edu/software/tophat/index.shtml) or [Kallisto](https://pachterlab.github.io/kallisto/). 
+we will discuss in the sections below assuming Bam file has been obtained. 
+This code chunk assumes that you have bam files for sample1-6 `s1.input.bam... s6..input.bam`
+and `s1.m6A.bam... s6..m6A.bam` and a vector of group asignment `X = c("Ctl","Ctl","Ctl","Treated","Treated","Treated")`. 
+
+```{r quickStart, eval=FALSE}
+RDM <- countReads(
+  samplenames = c("s1","s2","s3","s4","s5","s6"), 
+  gtf = "/path/to/file.gtf",
+  bamFolder = "/path/to/bam files",
+  modification = "m6A", 
+  strandToKeep = "opposite"
+)
+
+RDM <- normalizeLibrary( RDM, X )
+RDM <- adjustExprLevel( RDM )
+RDM <- filterBins( RDM ,minCountsCutOff = 15)
+RDM <- diffIP(RDM)
+res <- reportPoissonGammaMerge(RDM,cutoff = 0.1)
+```
+
+## How to get help for 
+
+
+
+
+
+
+## Standard workflow
+
+### Mapped bam file. 
+To analyze for MeRIP-seq data, **RNADMethyl** expect a pair of bam file for each sample. For each pair of bam file, the naming convention for **RNADMethyl** is `sample.input.bam` for **INPUT** and `sample.m6A.bam` for m6A **IP** or `sample.m1A.bam` for m1A **IP** sample. They key is **INPUT** and **IP** sample have the same prefix.
+
+### gtf annotation file.
+For the organism being analyzed, user need to provide an annotation file in gtf format to define the genomic coordinate of gene features. A good source to download those supporting files are [iGenome](https://support.illumina.com/sequencing/sequencing_software/igenome.html).
+
+### The RNADMethyl DataSet
+
+The __List__ object used by the RNADMethyl package to store the read counts 
+and associated parameters, which will usually be represented in the code
+here as an object `RDM`.
+
+We will use a toy data set to demonstrate how to start from bam file to count reads in consecutive bins and construct a RNADMethyl dataset. There are 9 contols and 8 cases sample in the toy dataset. We name them by Ctl# and Case# in the follow demonstrations.  
+Please note that user should set `bam_dir` to directory where bam files are saved instead of setting it to package assocated example file folder 
+`system.file("extdata",package = "RNADMethyl")`.  
+```{r prepare, message=FALSE}
+library(RNADMethyl)
+samplenames <- c( paste0("Ctl",1:9), paste0("Case",1:8) )
+bam_dir <- "~/PoissonGamma_Method/data"
+samplenames
+```
+
+Here we created a character vector `samplenames` to define the names of sample, which will later tells RNADMethyl to look for **input** and **IP** file with prefix samplenames.  
+Next we need to use `countReads()` function to 1) concatenate exons of each gene to get a "longest isoform" transcript of each gene. 2) Divide transcripts into consecutive bins of user defined width. 3) count reads mapped to each bin.  
+**note1** The parameter `modification = "m6A"` tells the function to look for bam file of IP by the name `samplename.m6A.bam`. If the user named the IP sample as `samplename.IP.bam`, `modification` should be set to `modification = "IP`. We enable flexible seeting for IP sample in cases where user perform MeRIP seq on multiple modification with shared **INPUT** library.  
+**note2** In Linux or MacOs, our package support multi-thread mode enabled by R package [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) . One can set the number of threads to use by `threads = n`.  
+**note3** The default setting for bin width to slice the transcript is 50bp. One can set this by parameter `binSize = #bp `. For very shallow sequencing depth (e.g. less than 10M mappable reads per library), we recommand setting bin width to larger size such as 100bp to increase the number of reads countable in each bin.  
+**note4** The parameter `shift` defines the number of nucleotide to shift from 5' end of reads to the center of RNA fragment. This number should be set to the half of your RNA fragment size in the sequencing library. In the example data, the RNA has been sonicated into ~150nt fragment before IP and library preparation.  
+```{r count_read, warning=FALSE}
+RDM <- countReads(samplenames = samplenames,
+                    gtf = "/home/zijiezhang/Database/genome/hg38/hg38_UCSC.gtf",
+                    bamFolder = bam_dir,
+                    modification = "m6A",
+                    shift = 75,
+                    outputDir = "test",
+                    threads = 12,
+                    binSize = 50
+)
+```
+
+
+Now we have read count of consecutive 50bp bins for each sample. The count data is saved as a matrix object in the return List object `RDM`. The count matrix can be returned by `RDM$reads`. We can take a look at the content of the `RDM` object.
+```{r}
+lapply(RDM,head)
+```
+
+As shown, we can see `countReads()` function returns a List object of 6 elements. `RMD$reads` stores the read count matrix. `RDM$binSize` stores the width of the bin to slice the transcript. `RDM$geneModel` is a genomic range list object store the exons of each gene.  
+
+### Normalization and Filtering  
+After obtaining the `RDM` object containing read count, we can then proceed to library normalization step. This step requires the user to define the grouping infomation by a vector parameter `X`.
+```{r normalizeLibrary, warning=FALSE}
+X <- c(rep("Ctl",9),rep("Case",8))
+RDM <- normalizeLibrary(RDM,X)
+```
+In this step, the _bin-level_ read count of **input** is summarized into _gene-level_ read count. The size factor of **input** is calculated using "mean ratio method" implemented in _DESeq2_, which is then used to calculated normalized **input** _bin-level_ read count. To normalize the library size of **IP** samples, we use top-read-count bins of **IP** and corresponding **input** gene-level read count to compute the enrichment esimate of each sample. Under the assumption that samples in the same study have same IP efficiency, we normalize the **IP** by normalizing the estimated **IP efficiency**. As an sanity check, in addition to return the RDM object with normalized read count, the `normalizeLibrary()` function also generate box plot of read count before and after normalizing **INPUT** and box plot of estimated enrichment before and after normalizing **IP**.  
+
+In the returned RDM object, there will be normalized gene-level **INPUT** count matrix stored in `RDM$geneSum`, which is essentially RNA-seq read count matrix. The normalized _bin-level_ read count matrix will be `RDM$norm.input`, `RDM$norm.ip` respectively. The `RDM` object will also contain size factor `RDM$sizeFactor` used to normalize each library. 
+```{r}
+RDM$sizeFactor
+```
+The grouping of the samples can be viewed by:
+```{r}
+RDM$X
+```
+  
+Next, we can use the _geneSum_ of **INPUT** to adjust for the variation of expression level of the **IP** read count. This step aims to account for the variation of **IP** read count attributed to variation of **gene expression level**.
+```{r}
+RDM <- adjustExprLevel(RDM)
+```
+
+This step add a new data `RDM$ip_adjExpr` to the `RDM` object. This matrix data are bin-level read count of **IP** adjusted for gene expression level variation. Then we will need to filter out bins of very low read count because under sampled locus can be strongly affected by technical variation. 
+```{r}
+RDM <- filterBins(RDM,minCountsCutOff = 15)
+```
+
+### Run Poisson Gamma Test  
+Now we have the count matrix for testing differential methylation ready.  
+To run the default PoissonGamma test, we can call the `diiIP()` function:
+```{r, eval=FALSE}
+RDM <- diffIP(RDM)
+```
+The code above run test on the effect of variable X defining the experimental group of samples, which is fine if the study is well designed and all known covariates are balanced. However, in most cases, samples might have been processed in more than one batches (especially when sample size is large) where batch effect and other covariate could contributed to the variation.  
+
+### PCA analysis  
+In order to check for unwanted variation, we can take the top 5000 bins ranked by count number (basically using the high read count bins) to plot PCA:
+```{r}
+top_bins <- RDM$ip_adjExpr_filtered[order(rowMeans(RDM$ip_adjExpr_filtered))[1:5000],]
+plotPCAfromMatrix(top_bins,group = RDM$X)
+```
+  
+We can see that our Case and Control are not separated by the first two PCs. To check if the samples are separated by batches, we can label the samples by batch instead of by experimental group `X`.
+```{r}
+batch <- c("A","A","A","A","B","B","C","C","C","A","A","B","A","B","B","A","C")
+plotPCAfromMatrix(top_bins,group = batch)
+```
+  
+We can see that the samples are clearly separated by batches and we need to account for batch effect in the test. To incorporate **covariates** in study design, we need first define a covariate matrix table where categorical variable should be converted to (0,1) binary variable. 
+```{r}
+library(rafalib)
+X2 <- as.fumeric(c("A","A","A","A","B","B","A","A","A","A","A","B","A","B","B","A","A"))-1 # batch as covariates
+X3 <- as.fumeric(c("A","A","A","A","A","A","C","C","C","A","A","A","A","A","A","A","C"))-1 # batch as covariates
+X4 <- as.fumeric(c("M","M","F","M","M","M","F","M","M","M","M","F","M","M","M","M","F"))-1 # sex as covariates
+cov <- cbind(X2,X3,X4)
+
+cov
+```
+Run the Poisson Gamma test with covariates to account for know source of variation.  
+```{r run_covariates, message=FALSE , echo=FALSE}
+RDM <-  diffIP(RDM,Covariates = cov)
+```
+
+At the end of test, a histgram of p-value distribution will be plotted. The plot can be turned off by `diffIP(RDM,Covariates = cov,plotPvalue = FALSE)`.  
+
+If for some reasons you want to remove a few samples from the test, you can set index number of the samples you want to skip to exclude them in the Poisson Gamma test.
+```
+diffIP(RDM,Covariates = cov,exclude = c())
+```
+
+In the `RDM` object returned by the `diffIP()`, a mtrix of test estimators has been stored at 
+```RDM$all.est```.  
+
+User can check the overall distribution of beta by
+```{r}
+hist(RDM$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab = "beta")
+## In case of test without covariates, substitute "beta1" by "beta".
+```
+  
+### Report the result
+The count matrix we worked on above are on continuous bins on the transcript and the test was performed on each bin. To report the final result, we want to merge neighbouring bins that pass a significance cutoff because signals for neighbouring bins are assumed to come from the same locus. We merge the p-value of connecting bins by [fisher's method](https://en.wikipedia.org/wiki/Fisher%27s_method) and report the max beta from neighbouring bins. Besides, We also need to report the genomic location instead of on mRNA location of the bin that passed the cutoff. To do so, call the function:
+```{r}
+Diff_peak <- reportPoissonGammaMerge(RDM,cutoff = 0.05)
+```
+The peak is reported at bed12 format with addition column for beta and p value.  
+```{r}
+head(Diff_peak)
+```
+
+## Model
+
+### Poisson Model
+
+$$ Y_i \sim \mathrm{Poi}(\lambda_i) $$  
+$$ log(\lambda_i) = \mu_1 + X_i\beta + e_i $$  
+We assume random effect $e_i\in log\mathrm{Gamma}(\psi,\psi)$ with scale parameter $\psi$ and mean equals to 1.  
+
+### Inference 
+We use log-likelihood ratio test to make inference where the null model is  
+$$ Y_i \sim \mathrm{Poi}(\lambda_i) $$  
+$$ log(\lambda_i) = \mu_1 + e_i $$ 
+
+
+
+
+# Acknowledgments
+
+We have benefited in the development of RNADMethyl from the help and
+feedback of many individuals, including but not limited to: 
+
+
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# References
+

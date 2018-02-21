@@ -26,7 +26,7 @@ normalizeLibrary <- function(readsOut,X){
   }
   colnames(geneSum) <- readsOut$samplenames
   
-  size.input <- DESeq2::estimateSizeFactorsForMatrix(geneSum)
+  size.input <- DESeq2::estimateSizeFactorsForMatrix(geneSum[rowSums(geneSum)>0,])
 
   norm.input <-t( t(input) / size.input )
   geneSum.norm <- t ( t(geneSum)/size.input)
