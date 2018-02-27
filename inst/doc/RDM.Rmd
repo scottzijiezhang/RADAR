@@ -43,14 +43,14 @@ Other Bioconductor packages with similar aims are
 [MeTDiff](https://github.com/compgenomics/MeTDiff)
 [QNB](https://cran.r-project.org/web/packages/QNB/index.html).
 
-## Quick start
+## 1.Quick start
 
 Here we show the most basic steps for a differential methylation
 analysis. There are one major steps upstream of RDM that generate 
-mapped reads in Bam files for each sample, which can be done by varies
+mapped reads in BAM files for each sample, which can be done by varies
 choices of softwares such as [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml), 
 [tophat2](http://www.ccb.jhu.edu/software/tophat/index.shtml) or [Kallisto](https://pachterlab.github.io/kallisto/). 
-we will discuss in the sections below assuming Bam file has been obtained. 
+we will discuss in the sections below assuming BAM file has been obtained. 
 This code chunk assumes that you have bam files for sample1-6 `s1.input.bam... s6..input.bam`
 and `s1.m6A.bam... s6..m6A.bam` and a vector of group asignment `X = c("Ctl","Ctl","Ctl","Treated","Treated","Treated")`. 
 
@@ -70,22 +70,18 @@ RDM <- diffIP(RDM)
 res <- reportPoissonGammaMerge(RDM,cutoff = 0.1)
 ```
 
-## How to get help for 
+## 2.How to get help for 
+Issues and questions about the package should be posted to the [issue report page of the github](https://github.com/scottzijiezhang/RNADMethyl/issues). The issue discussed here can served as public knowledge base.  
 
+## 3.Standard workflow
 
+### a). Mapped BAM file. 
+To analyze for MeRIP-seq data, **RNADMethyl** expect a pair of BAM file for each sample. For each pair of BAM file, the naming convention for **RNADMethyl** is `sample.input.bam` for **INPUT** and `sample.m6A.bam` for m6A **IP** or `sample.m1A.bam` for m1A **IP** sample. They key is **INPUT** and **IP** sample have the same prefix.
 
-
-
-
-## Standard workflow
-
-### Mapped bam file. 
-To analyze for MeRIP-seq data, **RNADMethyl** expect a pair of bam file for each sample. For each pair of bam file, the naming convention for **RNADMethyl** is `sample.input.bam` for **INPUT** and `sample.m6A.bam` for m6A **IP** or `sample.m1A.bam` for m1A **IP** sample. They key is **INPUT** and **IP** sample have the same prefix.
-
-### gtf annotation file.
+### b). GTF annotation file.
 For the organism being analyzed, user need to provide an annotation file in gtf format to define the genomic coordinate of gene features. A good source to download those supporting files are [iGenome](https://support.illumina.com/sequencing/sequencing_software/igenome.html).
 
-### The RNADMethyl DataSet
+### c). The RNADMethyl DataSet
 
 The __List__ object used by the RNADMethyl package to store the read counts 
 and associated parameters, which will usually be represented in the code
@@ -127,12 +123,14 @@ lapply(RDM,head)
 
 As shown, we can see `countReads()` function returns a List object of 6 elements. `RMD$reads` stores the read count matrix. `RDM$binSize` stores the width of the bin to slice the transcript. `RDM$geneModel` is a genomic range list object store the exons of each gene.  
 
-### Normalization and Filtering  
+### e). Normalization and Filtering  
 After obtaining the `RDM` object containing read count, we can then proceed to library normalization step. This step requires the user to define the grouping infomation by a vector parameter `X`.
 ```{r normalizeLibrary, warning=FALSE}
 X <- c(rep("Ctl",9),rep("Case",8))
+plot.new()
 RDM <- normalizeLibrary(RDM,X)
 ```
+
 In this step, the _bin-level_ read count of **input** is summarized into _gene-level_ read count. The size factor of **input** is calculated using "mean ratio method" implemented in _DESeq2_, which is then used to calculated normalized **input** _bin-level_ read count. To normalize the library size of **IP** samples, we use top-read-count bins of **IP** and corresponding **input** gene-level read count to compute the enrichment esimate of each sample. Under the assumption that samples in the same study have same IP efficiency, we normalize the **IP** by normalizing the estimated **IP efficiency**. As an sanity check, in addition to return the RDM object with normalized read count, the `normalizeLibrary()` function also generate box plot of read count before and after normalizing **INPUT** and box plot of estimated enrichment before and after normalizing **IP**.  
 
 In the returned RDM object, there will be normalized gene-level **INPUT** count matrix stored in `RDM$geneSum`, which is essentially RNA-seq read count matrix. The normalized _bin-level_ read count matrix will be `RDM$norm.input`, `RDM$norm.ip` respectively. The `RDM` object will also contain size factor `RDM$sizeFactor` used to normalize each library. 
@@ -154,7 +152,7 @@ This step add a new data `RDM$ip_adjExpr` to the `RDM` object. This matrix data 
 RDM <- filterBins(RDM,minCountsCutOff = 15)
 ```
 
-### Run Poisson Gamma Test  
+### e). Run Poisson Gamma Test  
 Now we have the count matrix for testing differential methylation ready.  
 To run the default PoissonGamma test, we can call the `diiIP()` function:
 ```{r, eval=FALSE}
@@ -162,7 +160,7 @@ RDM <- diffIP(RDM)
 ```
 The code above run test on the effect of variable X defining the experimental group of samples, which is fine if the study is well designed and all known covariates are balanced. However, in most cases, samples might have been processed in more than one batches (especially when sample size is large) where batch effect and other covariate could contributed to the variation.  
 
-### PCA analysis  
+### f). PCA analysis  
 In order to check for unwanted variation, we can take the top 5000 bins ranked by count number (basically using the high read count bins) to plot PCA:
 ```{r}
 top_bins <- RDM$ip_adjExpr_filtered[order(rowMeans(RDM$ip_adjExpr_filtered))[1:5000],]
@@ -185,9 +183,13 @@ cov <- cbind(X2,X3,X4)
 
 cov
 ```
-Run the Poisson Gamma test with covariates to account for know source of variation.  
+Run the Poisson Gamma test with covariates to account for know source of variation. 
+```{r, eval=FALSE}
+RDM <- diffIP(RDM,Covariates = cov)
+```  
+or multithread mode 
 ```{r run_covariates, message=FALSE , echo=FALSE}
-RDM <-  diffIP(RDM,Covariates = cov)
+RDM <-  diffIP_parallel(RDM,Covariates = cov,exclude = NULL,thread = 10)
 ```
 
 At the end of test, a histgram of p-value distribution will be plotted. The plot can be turned off by `diffIP(RDM,Covariates = cov,plotPvalue = FALSE)`.  
@@ -206,7 +208,7 @@ hist(RDM$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab
 ## In case of test without covariates, substitute "beta1" by "beta".
 ```
   
-### Report the result
+### g). Report the result
 The count matrix we worked on above are on continuous bins on the transcript and the test was performed on each bin. To report the final result, we want to merge neighbouring bins that pass a significance cutoff because signals for neighbouring bins are assumed to come from the same locus. We merge the p-value of connecting bins by [fisher's method](https://en.wikipedia.org/wiki/Fisher%27s_method) and report the max beta from neighbouring bins. Besides, We also need to report the genomic location instead of on mRNA location of the bin that passed the cutoff. To do so, call the function:
 ```{r}
 Diff_peak <- reportPoissonGammaMerge(RDM,cutoff = 0.05)
@@ -216,18 +218,92 @@ The peak is reported at bed12 format with addition column for beta and p value.
 head(Diff_peak)
 ```
 
-## Model
+## 4. Model
 
-### Poisson Model
+### a). Poisson model  
+ \begin{eqnarray*}
+Y_{i} &\sim& Poi(\lambda_{i})  \\
+\log(\lambda_{i} ) & = &   \mu_1 + X_i \beta +e_{i}
+ \end{eqnarray*}
 
-$$ Y_i \sim \mathrm{Poi}(\lambda_i) $$  
-$$ log(\lambda_i) = \mu_1 + X_i\beta + e_i $$  
-We assume random effect $e_i\in log\mathrm{Gamma}(\psi,\psi)$ with scale parameter $\psi$ and mean equals to 1.  
+ We assume random effect $e_{i} \in \log\text{Gamma}(\psi, \psi)$, with scale parameter $\psi$ and mean equal to $1$. This is equivalent to $\lambda_{i} = e^{ \mu_1 + X_i \beta} w_i$ where $w_i \in \text{Gamma}(\psi, \psi)$ . \
 
-### Inference 
-We use log-likelihood ratio test to make inference where the null model is  
-$$ Y_i \sim \mathrm{Poi}(\lambda_i) $$  
-$$ log(\lambda_i) = \mu_1 + e_i $$ 
+\begin{eqnarray*}
+ P( Y_i |  \Theta, - w_i) &=& \int e^{-w_i e^{  \mu_1 + X_i \beta}} \frac{(w_i e^{ \mu_1 + X_i \beta} )^{Y_i}}{Y_i!} \frac{\psi^\psi w_i^{\psi-1}e^{-\psi w_i}}{\Gamma(\psi)} d w_i\\ 
+ &=& \frac{ \psi^\psi }{Y_i! } \frac{ \Gamma(Y_i+\psi) } {\Gamma(\psi) } \frac{ (e^{  \mu_1 + X_i \beta})^{Y_i}}{ (e^{  \mu_1 + X_i \beta} + \psi)^{Y_i + \psi}}
+\end{eqnarray*}
+  
+ The marginal log likelihood of observing $\mathbf{Y}$  can be written as:
+  \begin{eqnarray*}
+\log L( \mathbf{Y} ) &=&  \sum_{i}^n   [ Y_i(  \mu_1 + X_i \beta) + \psi \log \psi + \log \Gamma(Y_i  + \psi) - \log Y_i! -  \log \Gamma( \psi) -  (Y_i  + \psi) \log( e^{  \mu_1 + X_i \beta} + \psi)] \\
+ \end{eqnarray*}
+ 
+### b). Estimation  
+ We use gradient ascent algorithm to estimate the parameters, which involves the calculation of first derivatives.   
+\begin{eqnarray*}
+\frac{ \partial \log L( \mathbf{Y} ) }{ \partial \beta } &=& \sum_{i}^n  \ \Big[  Y_i  - \big (Y_i + \psi \big )\frac{e^{  \mu_1+ X_i \beta}}{ e^{  \mu_1 + X_i \beta} +\psi} \Big] X_i \\
+\frac{ \partial \log L( \mathbf{Y} )  }{ \partial \psi} &=&  \sum_{i}^n  \Big [ \log \psi + 1 - \frac{Y_i +  \psi }{  e^{  \mu_1 + X_i \beta} +\psi} - \log ( e^{  \mu_1 + X_i \beta} +\psi ) \\
+ &&+ \text{digamma} ( Y_i +  \psi)  -   \text{digamma} (  \psi)   \Big ] \\
+\frac{ \partial \log L( \mathbf{Y} ) }{ \partial \mu _1} &=&   \sum_{i}^n  \Big[  Y_i - \big (Y_i + \psi \big ) \frac{e^{  \mu_1 + X_i \beta} }{e^{  \mu_1 + X_i \beta} + \psi}  \Big] 
+ \end{eqnarray*}
+ In each iteration, the parameters are updated through $ \Phi_{(t+1)} = \Phi_{(t)} + s_{(t+1)} \frac{ \partial \log( \mathbf{Y} ) }{ \partial \Phi}_ {|\Phi= \Phi_{(t)}}$.  The step size $s_{(t+1)}$ is determined by a line search algorithm. 
+ 
+ 
+### c). Inference  
+ We use log-likelihood ratio test to make the inference, where the null model is 
+\begin{eqnarray*}
+Y_{i} &\sim& Poi(\lambda_{i})  \\
+\log(\lambda_{i} ) & = &   \mu_1 + e_{i}.
+ \end{eqnarray*}
+
+
+  
+### d). Poisson model + covariates  
+ \begin{eqnarray*}
+Y_{i} &\sim& Poi(\lambda_{i})  \\
+\log(\lambda_{i} ) & = &   \mu_1 + \mathbf{X_i} \mathbf{\beta} +e_{i}
+ \end{eqnarray*}
+
+ We assume random effect $e_{i} \in \log\text{Gamma}(\psi, \psi)$, with scale parameter $\psi$ and mean equal to $1$. This is equivalent to $\lambda_{i} = e^{ \mu_1 + \mathbf{X_i} \mathbf{\beta}} w_i$ where $w_i \in \text{Gamma}(\psi, \psi)$ . 
+
+\begin{eqnarray*}
+ P( Y_i |  \Theta, - w_i) &=& \int e^{-w_i e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}}} \frac{(w_i e^{ \mu_1 + \mathbf{X_i} \mathbf{\beta}} )^{Y_i}}{Y_i!} \frac{\psi^\psi w_i^{\psi-1}e^{-\psi w_i}}{\Gamma(\psi)} d w_i\\ 
+ &=& \frac{ \psi^\psi }{Y_i! } \frac{ \Gamma(Y_i+\psi) } {\Gamma(\psi) } \frac{ (e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}})^{Y_i}}{ (e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} + \psi)^{Y_i + \psi}}
+\end{eqnarray*}
+  
+ The marginal log likelihood of observing $\mathbf{Y}$  can be written as:
+  \begin{eqnarray*}
+\log L( \mathbf{Y} ) &=&  \sum_{i}^n   [ Y_i(  \mu_1 + \mathbf{X_i} \mathbf{\beta} ) + \psi \log \psi + \log \Gamma(Y_i  + \psi) - \log Y_i! -  \log \Gamma( \psi) -  (Y_i  + \psi) \log( e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} + \psi)] \\
+ \end{eqnarray*}
+ 
+#### Estimation
+ We use gradient ascent algorithm to estimate the parameters, which involves the calculation of first derivatives.   
+\begin{eqnarray*}
+\frac{ \partial \log L( \mathbf{Y} ) }{ \partial \beta_k } &=& \sum_{i}^n  \ \Big[  Y_i  - \big (Y_i + \psi \big )\frac{e^{  \mu_1+ \mathbf{X_i} \mathbf{\beta}}}{ e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} +\psi} \Big] X_{ik} \\
+\frac{ \partial \log L( \mathbf{Y} )  }{ \partial \psi} &=&  \sum_{i}^n  \Big [ \log \psi + 1 - \frac{Y_i +  \psi }{  e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta} } +\psi} - \log ( e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} +\psi ) \\
+ &&+ \text{digamma} ( Y_i +  \psi)  -   \text{digamma} (  \psi)   \Big ] \\
+\frac{ \partial \log L( \mathbf{Y} ) }{ \partial \mu _1} &=&   \sum_{i}^n  \Big[  Y_i - \big (Y_i + \psi \big ) \frac{e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} }{e^{  \mu_1 + \mathbf{X_i} \mathbf{\beta}} + \psi}  \Big] 
+ \end{eqnarray*}
+ In each iteration, the parameters are updated through $ \Phi_{(t+1)} = \Phi_{(t)} + s_{(t+1)} \frac{ \partial \log( \mathbf{Y} ) }{ \partial \Phi}_ {|\Phi= \Phi_{(t)}}$.  The step size $s_{(t+1)}$ is determined by a line search algorithm. 
+ 
+ 
+#### Inference 
+% We use log-likelihood ratio test to make the inference for each $\beta_k$, where the null model is 
+%\begin{eqnarray*}
+%Y_{i} &\sim& Poi(\lambda_{i})  \\
+%\log(\lambda_{i} ) & = &   \mu_1 + \sum_{j \neq k}^{K} X_{ij} \beta_j + e_{i}.
+% \end{eqnarray*}
+We use observed fisher information to make the inference for all parameters. The calculation involves all second derivatives and partial derivatives.   
+ \begin{eqnarray*}
+\frac{ \partial^2\log L( \mathbf{Y} )}{\partial \beta_k^2} &=&  -  \sum_{i}^n   \frac{e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} }}{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}    \psi   \big (Y_i + \psi \big ) X_{ik}^2  \\
+\frac{ \partial^2\log L( \mathbf{Y} )}{\partial \beta_k \beta_k'} &=&  -  \sum_{i}^n   \frac{e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} }}{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}    \psi   \big (Y_i + \psi \big )  X_{ik} X_{ik'}  \\
+\frac{ \partial^2 \log L( \mathbf{Y} ) }{\partial \beta_k  \partial \mu_1} &=&  - \sum_{i}^n   \frac{e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} }}{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}    \psi   \big (Y_i + \psi \big ) X_{ik}  \\
+\frac{ \partial^2 \log L( \mathbf{Y} ) }{\partial \beta_k  \partial \psi} &=&   \sum_{i}^n  \Big[   \frac{e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } }{ \big ( e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}  \big (Y_i + \psi \big ) X_{ik}  - \frac{e^{   \mu_1 +  \mathbf{X_i} \mathbf{\beta} } }{ e^{   \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi } X_{ik} \Big]\\
+\frac{ \partial^2 \log L( \mathbf{Y} ) }{\partial \mu_1^2} &=& - \sum_{i}^n   \frac{e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta}} }{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}  \psi  \big (Y_i + \psi \big )  \\
+\frac{ \partial^2 \log L( \mathbf{Y} ) }{\partial \mu_1 \partial \psi} &=& \sum_{i}^n  \Big[   \frac{e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } }{ \big ( e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}  \big (Y_i + \psi \big ) -\frac{e^{   \mu_1 +  \mathbf{X_i} \mathbf{\beta} } }{ e^{   \mu_1 +  \mathbf{X_i} \mathbf{\beta} }  + \psi } \Big] \\
+\frac{ \partial^2 \log L( \mathbf{Y} ) }{\partial \psi^2} &=&  \sum_{i}^n \Big[  \frac{1}{\psi}  - \frac{2}{e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi}  +  \frac{Y_i + \psi }{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta}} + \psi \big ) ^2} + \text{trigamma}(Y_i + \psi) -  \text{trigamma}(\psi)  \Big] \\
+\end{eqnarray*}
+ 
 
 
 

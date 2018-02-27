@@ -4,6 +4,7 @@
 #' @param est By default "auto", the function takes estimates from given The RNADMethyl data list. One can also pass a test estimates by assigning it to stats.
 reportPoissonGammaMerge <- function(x,
                                     cutoff,
+                                    Beta_cutoff = 0.5,
                                     est = "auto"
                                     ){
   
@@ -21,9 +22,9 @@ reportPoissonGammaMerge <- function(x,
   cat("Getting significant bins....\n")
 
   if("p_value" %in% colnames(stats)){
-    sig.bins <- rownames(stats[stats[,"padj"] < cutoff ,])
+    sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff,])
   }else if("p_value3" %in% colnames(stats) ){
-    sig.bins <- rownames(stats[stats[,"padj"] < cutoff ,])
+    sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff,])
     colnames(stats)[which(colnames(stats) == "p_value3")] = "p_value"
     colnames(stats)[which(colnames(stats) == "beta1")] = "beta"
   }else{
@@ -93,6 +94,7 @@ reportPoissonGammaMerge <- function(x,
     end_time <- Sys.time()
     cat(paste("Time used to report peaks:",difftime(end_time, start_time, units = "mins"),"mins... \n"))
   }
+  merged.report <- merged.report[order(abs(merged.report$logFC),decreasing = T),]
   return( merged.report )
 }
 
