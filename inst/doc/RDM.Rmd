@@ -295,11 +295,11 @@ Y_{i} &\sim& Poi(\lambda_{i})  \\
  
  
 #### Inference 
-% We use log-likelihood ratio test to make the inference for each $\beta_k$, where the null model is 
-%\begin{eqnarray*}
-%Y_{i} &\sim& Poi(\lambda_{i})  \\
-%\log(\lambda_{i} ) & = &   \mu_1 + \sum_{j \neq k}^{K} X_{ij} \beta_j + e_{i}.
-% \end{eqnarray*}
+We use log-likelihood ratio test to make the inference for each $\beta_k$, where the null model is 
+\begin{eqnarray*}
+Y_{i} &\sim& Poi(\lambda_{i})  \\
+\log(\lambda_{i} ) & = &   \mu_1 + \sum_{j \neq k}^{K} X_{ij} \beta_j + e_{i}.
+ \end{eqnarray*}
 We use observed fisher information to make the inference for all parameters. The calculation involves all second derivatives and partial derivatives.   
  \begin{eqnarray*}
 \frac{ \partial^2\log L( \mathbf{Y} )}{\partial \beta_k^2} &=&  -  \sum_{i}^n   \frac{e^{  \mu_1 +  \mathbf{X_i} \mathbf{\beta} }}{ \big ( e^{ \mu_1 +  \mathbf{X_i} \mathbf{\beta} } + \psi \big ) ^2}    \psi   \big (Y_i + \psi \big ) X_{ik}^2  \\
