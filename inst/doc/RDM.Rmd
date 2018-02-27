@@ -51,6 +51,7 @@ mapped reads in BAM files for each sample, which can be done by varies
 choices of softwares such as [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml), 
 [tophat2](http://www.ccb.jhu.edu/software/tophat/index.shtml) or [Kallisto](https://pachterlab.github.io/kallisto/). 
 we will discuss in the sections below assuming BAM file has been obtained. 
+
 This code chunk assumes that you have bam files for sample1-6 `s1.input.bam... s6..input.bam`
 and `s1.m6A.bam... s6..m6A.bam` and a vector of group asignment `X = c("Ctl","Ctl","Ctl","Treated","Treated","Treated")`. 
 
@@ -153,6 +154,7 @@ RDM <- filterBins(RDM,minCountsCutOff = 15)
 ```
 
 ### e). Run Poisson Gamma Test  
+
 Now we have the count matrix for testing differential methylation ready.  
 To run the default PoissonGamma test, we can call the `diiIP()` function:
 ```{r, eval=FALSE}
@@ -160,7 +162,9 @@ RDM <- diffIP(RDM)
 ```
 The code above run test on the effect of variable X defining the experimental group of samples, which is fine if the study is well designed and all known covariates are balanced. However, in most cases, samples might have been processed in more than one batches (especially when sample size is large) where batch effect and other covariate could contributed to the variation.  
 
+
 ### f). PCA analysis  
+
 In order to check for unwanted variation, we can take the top 5000 bins ranked by count number (basically using the high read count bins) to plot PCA:
 ```{r}
 top_bins <- RDM$ip_adjExpr_filtered[order(rowMeans(RDM$ip_adjExpr_filtered))[1:5000],]
@@ -183,6 +187,7 @@ cov <- cbind(X2,X3,X4)
 
 cov
 ```
+
 Run the Poisson Gamma test with covariates to account for know source of variation. 
 ```{r, eval=FALSE}
 RDM <- diffIP(RDM,Covariates = cov)
@@ -208,7 +213,9 @@ hist(RDM$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab
 ## In case of test without covariates, substitute "beta1" by "beta".
 ```
   
+
 ### g). Report the result
+
 The count matrix we worked on above are on continuous bins on the transcript and the test was performed on each bin. To report the final result, we want to merge neighbouring bins that pass a significance cutoff because signals for neighbouring bins are assumed to come from the same locus. We merge the p-value of connecting bins by [fisher's method](https://en.wikipedia.org/wiki/Fisher%27s_method) and report the max beta from neighbouring bins. Besides, We also need to report the genomic location instead of on mRNA location of the bin that passed the cutoff. To do so, call the function:
 ```{r}
 Diff_peak <- reportPoissonGammaMerge(RDM,cutoff = 0.05)
