@@ -17,7 +17,7 @@ output:
   rmarkdown::html_document:
     highlight: pygments
     toc: true
-    fig_width: 5
+    fig_width: 8
 vignette: >
   %\VignetteIndexEntry{Analyzing MeRIP-seq data with RNADMethyl}
   %\VignetteEngine{knitr::rmarkdown}
@@ -212,9 +212,23 @@ User can check the overall distribution of beta by
 hist(RDM$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab = "beta")
 ## In case of test without covariates, substitute "beta1" by "beta".
 ```
-  
 
-### g). Report the result
+### g). Visualize the result by heatmap
+To assess the pattern of variation of the MeRIP-seq data, we can plot the heatmap of normalized **IP** read counts adjusted for expression level.  
+The belowing code shows how to plot heatmap on the RDM object.
+```{r}
+plotHeatMap(RDM)
+```
+
+In our example, as we determined earlier by PCA plot that batch effect is contibuting substantially to the variation of our data set. we need to plot heatmap on data regressing out covariates as determined earlier in the analysis. To do so, add covariates matrix to the `plotHeatMap()` function.
+```{r}
+plotHeatMap(RDM,covariates = cov)
+```
+
+Since plotting too many bins willl look very messy, the function takes the top 5000 bins ranked by test p value. In another words, the heatmap generated here is a visualization the top differential methylated loci. From the heatmap we can see the methylation profile of `Ctl8` looks much closer to Cases than to Controls, which suggest this sample is an outlier.  
+At this point, one can proceed to the next step to report the significantly differentially methylated bins to genomic location or repeat the analysis excluding the outlier sample. 
+
+### h). Report the result
 
 The count matrix we worked on above are on continuous bins on the transcript and the test was performed on each bin. To report the final result, we want to merge neighbouring bins that pass a significance cutoff because signals for neighbouring bins are assumed to come from the same locus. We merge the p-value of connecting bins by [fisher's method](https://en.wikipedia.org/wiki/Fisher%27s_method) and report the max beta from neighbouring bins. Besides, We also need to report the genomic location instead of on mRNA location of the bin that passed the cutoff. To do so, call the function:
 ```{r}
@@ -224,6 +238,8 @@ The peak is reported at bed12 format with addition column for beta and p value.
 ```{r}
 head(Diff_peak)
 ```
+### i). Visualize MeRIP-seq data by sequencing coverage plot.
+
 
 ## 4. Model
 

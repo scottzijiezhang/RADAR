@@ -264,7 +264,7 @@ diffIP_parallel <- function(x,
       }
       est
     }
-    stopImplicitCluster()
+    rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
     end_time <- Sys.time()
     cat(paste("Time used to run multi-beta PoissonGamma test:",difftime(end_time, start_time, units = "mins"),"mins... \n"))
     all.id <- which(! 1:nrow(all1) %in% error.id )
