@@ -16,3 +16,6 @@ iterators
 doParallel
 RNADMethyl
 rafalib
+gplots
+RColorBrewer
+RADAR

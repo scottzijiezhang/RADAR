@@ -1,8 +1,8 @@
 ---
 title: "Analyzing MeRIP-seq data with PoissonGamma"
-author: "Zijie Zhang, Chuan He, Mengjie Chen"
+author: "Zijie Zhang, Allen Zhu, Chuan He, Mengjie Chen"
 date: "`r BiocStyle::doc_date()`"
-package: "`r BiocStyle::pkg_ver('RNADMethyl')`"
+package: "`r BiocStyle::pkg_ver('RADAR')`"
 abstract: >
   A basic task in the analysis of MeRIP-seq is the detection of differentially 
   methylated loci on the RNA. To analyze the count data of MeRIP-seq, we divide 
@@ -10,16 +10,17 @@ abstract: >
   quantify the reads align to each bin. The summarized count data is in table
   format where each row represent a loci and each column is an sample. Statistical
   inference of changes across group, as compared to within-group variability was 
-  made for each bin. This vignette explains the use of the package RNADMethyl with
+  made for each bin with sufficient count. This vignette explains the use of the package RADAR with
   example data.
-  RNADMethyl package version: `r packageVersion("RNADMethyl")`
+  RADAR package version: `r packageVersion("RADAR")`
 output:
   rmarkdown::html_document:
     highlight: pygments
     toc: true
+    toc_float: true
     fig_width: 8
 vignette: >
-  %\VignetteIndexEntry{Analyzing MeRIP-seq data with RNADMethyl}
+  %\VignetteIndexEntry{Analyzing MeRIP-seq data with RADAR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding[utf8]{inputenc}
 ---
@@ -31,7 +32,7 @@ knitr::opts_chunk$set(tidy=FALSE, cache=TRUE,
 ```	
 
 
-**Note:** if you use RNADMethyl in published research, please cite:
+**Note:** if you use RADAR in published research, please cite:
 
 > 
 > 
@@ -46,7 +47,7 @@ Other Bioconductor packages with similar aims are
 ## 1.Quick start
 
 Here we show the most basic steps for a differential methylation
-analysis. There are one major steps upstream of RDM that generate 
+analysis. There are one major steps upstream of radar that generate 
 mapped reads in BAM files for each sample, which can be done by varies
 choices of softwares such as [Hisat2](https://ccb.jhu.edu/software/hisat2/index.shtml), 
 [tophat2](http://www.ccb.jhu.edu/software/tophat/index.shtml) or [Kallisto](https://pachterlab.github.io/kallisto/). 
@@ -56,7 +57,7 @@ This code chunk assumes that you have bam files for sample1-6 `s1.input.bam... s
 and `s1.m6A.bam... s6..m6A.bam` and a vector of group asignment `X = c("Ctl","Ctl","Ctl","Treated","Treated","Treated")`. 
 
 ```{r quickStart, eval=FALSE}
-RDM <- countReads(
+radar <- countReads(
   samplenames = c("s1","s2","s3","s4","s5","s6"), 
   gtf = "/path/to/file.gtf",
   bamFolder = "/path/to/bam files",
@@ -64,49 +65,49 @@ RDM <- countReads(
   strandToKeep = "opposite"
 )
 
-RDM <- normalizeLibrary( RDM, X )
-RDM <- adjustExprLevel( RDM )
-RDM <- filterBins( RDM ,minCountsCutOff = 15)
-RDM <- diffIP(RDM)
-res <- reportPoissonGammaMerge(RDM,cutoff = 0.1)
+radar <- normalizeLibrary( radar, X )
+radar <- adjustExprLevel( radar )
+radar <- filterBins( radar ,minCountsCutOff = 15)
+radar <- diffIP(radar)
+res <- reportPoissonGammaMerge(radar,cutoff = 0.1)
 ```
 
 ## 2.How to get help for 
-Issues and questions about the package should be posted to the [issue report page of the github](https://github.com/scottzijiezhang/RNADMethyl/issues). The issue discussed here can served as public knowledge base.  
+Issues and questions about the package should be posted to the [issue report page of the github](https://github.com/scottzijiezhang/RADAR/issues). The issue discussed here can served as public knowledge base.  
 
 ## 3.Standard workflow
 
 ### a). Mapped BAM file. 
-To analyze for MeRIP-seq data, **RNADMethyl** expect a pair of BAM file for each sample. For each pair of BAM file, the naming convention for **RNADMethyl** is `sample.input.bam` for **INPUT** and `sample.m6A.bam` for m6A **IP** or `sample.m1A.bam` for m1A **IP** sample. They key is **INPUT** and **IP** sample have the same prefix.
+To analyze for MeRIP-seq data, **RADAR** expect a pair of BAM file for each sample. For each pair of BAM file, the naming convention for **RADAR** is `sample.input.bam` for **INPUT** and `sample.m6A.bam` for m6A **IP** or `sample.m1A.bam` for m1A **IP** sample. They key is **INPUT** and **IP** sample have the same prefix.
 
 ### b). GTF annotation file.
 For the organism being analyzed, user need to provide an annotation file in gtf format to define the genomic coordinate of gene features. A good source to download those supporting files are [iGenome](https://support.illumina.com/sequencing/sequencing_software/igenome.html).
 
-### c). The RNADMethyl DataSet
+### c). The RADAR DataSet
 
-The __List__ object used by the RNADMethyl package to store the read counts 
+The __List__ object used by the RADAR package to store the read counts 
 and associated parameters, which will usually be represented in the code
-here as an object `RDM`.
+here as an object `radar`.
 
-We will use a toy data set to demonstrate how to start from bam file to count reads in consecutive bins and construct a RNADMethyl dataset. There are 9 contols and 8 cases sample in the toy dataset. We name them by Ctl# and Case# in the follow demonstrations.  
+We will use a toy data set to demonstrate how to start from bam file to count reads in consecutive bins and construct a RADAR dataset. There are 9 contols and 8 cases sample in the toy dataset. We name them by Ctl# and Case# in the follow demonstrations.  
 Please note that user should set `bam_dir` to directory where bam files are saved instead of setting it to package assocated example file folder 
-`system.file("extdata",package = "RNADMethyl")`.  
+`system.file("extdata",package = "RADAR")`.  
 ```{r prepare, message=FALSE}
-library(RNADMethyl)
+library(RADAR)
 samplenames <- c( paste0("Ctl",1:9), paste0("Case",1:8) )
 bam_dir <- "~/PoissonGamma_Method/data"
 samplenames
 ```
 
-Here we created a character vector `samplenames` to define the names of sample, which will later tells RNADMethyl to look for **input** and **IP** file with prefix samplenames.  
+Here we created a character vector `samplenames` to define the names of sample, which will later tells RADAR to look for **input** and **IP** file with prefix samplenames.  
 Next we need to use `countReads()` function to 1) concatenate exons of each gene to get a "longest isoform" transcript of each gene. 2) Divide transcripts into consecutive bins of user defined width. 3) count reads mapped to each bin.  
 **note1** The parameter `modification = "m6A"` tells the function to look for bam file of IP by the name `samplename.m6A.bam`. If the user named the IP sample as `samplename.IP.bam`, `modification` should be set to `modification = "IP`. We enable flexible seeting for IP sample in cases where user perform MeRIP seq on multiple modification with shared **INPUT** library.  
 **note2** In Linux or MacOs, our package support multi-thread mode enabled by R package [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) . One can set the number of threads to use by `threads = n`.  
 **note3** The default setting for bin width to slice the transcript is 50bp. One can set this by parameter `binSize = #bp `. For very shallow sequencing depth (e.g. less than 10M mappable reads per library), we recommand setting bin width to larger size such as 100bp to increase the number of reads countable in each bin.  
 **note4** The parameter `shift` defines the number of nucleotide to shift from 5' end of reads to the center of RNA fragment. This number should be set to the half of your RNA fragment size in the sequencing library. In the example data, the RNA has been sonicated into ~150nt fragment before IP and library preparation.  
 ```{r count_read, warning=FALSE}
-RDM <- countReads(samplenames = samplenames,
-                    gtf = "/home/zijiezhang/Database/genome/hg38/hg38_UCSC.gtf",
+radar <- countReads(samplenames = samplenames,
+                    gtf = "~/Database/genome/hg38/hg38_UCSC.gtf",
                     bamFolder = bam_dir,
                     modification = "m6A",
                     shift = 75,
@@ -117,40 +118,40 @@ RDM <- countReads(samplenames = samplenames,
 ```
 
 
-Now we have read count of consecutive 50bp bins for each sample. The count data is saved as a matrix object in the return List object `RDM`. The count matrix can be returned by `RDM$reads`. We can take a look at the content of the `RDM` object.
+Now we have read count of consecutive 50bp bins for each sample. The count data is saved as a matrix object in the return List object `radar`. The count matrix can be returned by `radar$reads`. We can take a look at the content of the `radar` object.
 ```{r}
-lapply(RDM,head)
+lapply(radar,head)
 ```
 
-As shown, we can see `countReads()` function returns a List object of 6 elements. `RMD$reads` stores the read count matrix. `RDM$binSize` stores the width of the bin to slice the transcript. `RDM$geneModel` is a genomic range list object store the exons of each gene.  
+As shown, we can see `countReads()` function returns a List object of 6 elements. `RMD$reads` stores the read count matrix. `radar$binSize` stores the width of the bin to slice the transcript. `radar$geneModel` is a genomic range list object store the exons of each gene.  
 
 ### e). Normalization and Filtering  
-After obtaining the `RDM` object containing read count, we can then proceed to library normalization step. This step requires the user to define the grouping infomation by a vector parameter `X`.
+After obtaining the `radar` object containing read count, we can then proceed to library normalization step. This step requires the user to define the grouping infomation by a vector parameter `X`.
 ```{r normalizeLibrary, warning=FALSE}
 X <- c(rep("Ctl",9),rep("Case",8))
 plot.new()
-RDM <- normalizeLibrary(RDM,X)
+radar <- normalizeLibrary(radar,X)
 ```
 
-In this step, the _bin-level_ read count of **input** is summarized into _gene-level_ read count. The size factor of **input** is calculated using "mean ratio method" implemented in _DESeq2_, which is then used to calculated normalized **input** _bin-level_ read count. To normalize the library size of **IP** samples, we use top-read-count bins of **IP** and corresponding **input** gene-level read count to compute the enrichment esimate of each sample. Under the assumption that samples in the same study have same IP efficiency, we normalize the **IP** by normalizing the estimated **IP efficiency**. As an sanity check, in addition to return the RDM object with normalized read count, the `normalizeLibrary()` function also generate box plot of read count before and after normalizing **INPUT** and box plot of estimated enrichment before and after normalizing **IP**.  
+In this step, the _bin-level_ read count of **input** is summarized into _gene-level_ read count. The size factor of **input** is calculated using "mean ratio method" implemented in _DESeq2_, which is then used to calculated normalized **input** _bin-level_ read count. To normalize the library size of **IP** samples, we use top-read-count bins of **IP** and corresponding **input** gene-level read count to compute the enrichment esimate of each sample. Under the assumption that samples in the same study have same IP efficiency, we normalize the **IP** by normalizing the estimated **IP efficiency**. As an sanity check, in addition to return the radar object with normalized read count, the `normalizeLibrary()` function also generate box plot of read count before and after normalizing **INPUT** and box plot of estimated enrichment before and after normalizing **IP**.  
 
-In the returned RDM object, there will be normalized gene-level **INPUT** count matrix stored in `RDM$geneSum`, which is essentially RNA-seq read count matrix. The normalized _bin-level_ read count matrix will be `RDM$norm.input`, `RDM$norm.ip` respectively. The `RDM` object will also contain size factor `RDM$sizeFactor` used to normalize each library. 
+In the returned radar object, there will be normalized gene-level **INPUT** count matrix stored in `radar$geneSum`, which is essentially RNA-seq read count matrix. The normalized _bin-level_ read count matrix will be `radar$norm.input`, `radar$norm.ip` respectively. The `radar` object will also contain size factor `radar$sizeFactor` used to normalize each library. 
 ```{r}
-RDM$sizeFactor
+radar$sizeFactor
 ```
 The grouping of the samples can be viewed by:
 ```{r}
-RDM$X
+radar$X
 ```
   
 Next, we can use the _geneSum_ of **INPUT** to adjust for the variation of expression level of the **IP** read count. This step aims to account for the variation of **IP** read count attributed to variation of **gene expression level**.
 ```{r}
-RDM <- adjustExprLevel(RDM)
+radar <- adjustExprLevel(radar)
 ```
 
-This step add a new data `RDM$ip_adjExpr` to the `RDM` object. This matrix data are bin-level read count of **IP** adjusted for gene expression level variation. Then we will need to filter out bins of very low read count because under sampled locus can be strongly affected by technical variation. 
+This step add a new data `radar$ip_adjExpr` to the `radar` object. This matrix data are bin-level read count of **IP** adjusted for gene expression level variation. Then we will need to filter out bins of very low read count because under sampled locus can be strongly affected by technical variation. 
 ```{r}
-RDM <- filterBins(RDM,minCountsCutOff = 15)
+radar <- filterBins(radar,minCountsCutOff = 15)
 ```
 
 ### e). Run Poisson Gamma Test  
@@ -158,7 +159,7 @@ RDM <- filterBins(RDM,minCountsCutOff = 15)
 Now we have the count matrix for testing differential methylation ready.  
 To run the default PoissonGamma test, we can call the `diiIP()` function:
 ```{r, eval=FALSE}
-RDM <- diffIP(RDM)
+radar <- diffIP(radar)
 ```
 The code above run test on the effect of variable X defining the experimental group of samples, which is fine if the study is well designed and all known covariates are balanced. However, in most cases, samples might have been processed in more than one batches (especially when sample size is large) where batch effect and other covariate could contributed to the variation.  
 
@@ -167,8 +168,8 @@ The code above run test on the effect of variable X defining the experimental gr
 
 In order to check for unwanted variation, we can take the top 5000 bins ranked by count number (basically using the high read count bins) to plot PCA:
 ```{r}
-top_bins <- RDM$ip_adjExpr_filtered[order(rowMeans(RDM$ip_adjExpr_filtered))[1:5000],]
-plotPCAfromMatrix(top_bins,group = RDM$X)
+top_bins <- radar$ip_adjExpr_filtered[order(rowMeans(radar$ip_adjExpr_filtered))[1:5000],]
+plotPCAfromMatrix(top_bins,group = radar$X)
 ```
   
 We can see that our Case and Control are not separated by the first two PCs. To check if the samples are separated by batches, we can label the samples by batch instead of by experimental group `X`.
@@ -190,39 +191,39 @@ cov
 
 Run the Poisson Gamma test with covariates to account for know source of variation. 
 ```{r, eval=FALSE}
-RDM <- diffIP(RDM,Covariates = cov)
+radar <- diffIP(radar,Covariates = cov)
 ```  
 or multithread mode 
 ```{r run_covariates, message=FALSE , echo=FALSE}
-RDM <-  diffIP_parallel(RDM,Covariates = cov,exclude = NULL,thread = 10)
+radar <-  diffIP_parallel(radar,Covariates = cov,exclude = NULL,thread = 10)
 ```
 
-At the end of test, a histgram of p-value distribution will be plotted. The plot can be turned off by `diffIP(RDM,Covariates = cov,plotPvalue = FALSE)`.  
+At the end of test, a histgram of p-value distribution will be plotted. The plot can be turned off by `diffIP(radar,Covariates = cov,plotPvalue = FALSE)`.  
 
 If for some reasons you want to remove a few samples from the test, you can set index number of the samples you want to skip to exclude them in the Poisson Gamma test.
 ```
-diffIP(RDM,Covariates = cov,exclude = c())
+diffIP(radar,Covariates = cov,exclude = c())
 ```
 
-In the `RDM` object returned by the `diffIP()`, a mtrix of test estimators has been stored at 
-```RDM$all.est```.  
+In the `radar` object returned by the `diffIP()`, a mtrix of test estimators has been stored at 
+```radar$all.est```.  
 
 User can check the overall distribution of beta by
 ```{r}
-hist(RDM$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab = "beta")
+hist(radar$all.est[,"beta1"],breaks = 50,main = "Distribution of effect size",xlab = "beta")
 ## In case of test without covariates, substitute "beta1" by "beta".
 ```
 
 ### g). Visualize the result by heatmap
 To assess the pattern of variation of the MeRIP-seq data, we can plot the heatmap of normalized **IP** read counts adjusted for expression level.  
-The belowing code shows how to plot heatmap on the RDM object.
+The belowing code shows how to plot heatmap on the radar object.
 ```{r}
-plotHeatMap(RDM)
+plotHeatMap(radar)
 ```
 
 In our example, as we determined earlier by PCA plot that batch effect is contibuting substantially to the variation of our data set. we need to plot heatmap on data regressing out covariates as determined earlier in the analysis. To do so, add covariates matrix to the `plotHeatMap()` function.
 ```{r}
-plotHeatMap(RDM,covariates = cov)
+plotHeatMap(radar,covariates = cov)
 ```
 
 Since plotting too many bins willl look very messy, the function takes the top 5000 bins ranked by test p value. In another words, the heatmap generated here is a visualization the top differential methylated loci. From the heatmap we can see the methylation profile of `Ctl8` looks much closer to Cases than to Controls, which suggest this sample is an outlier.  
@@ -232,13 +233,31 @@ At this point, one can proceed to the next step to report the significantly diff
 
 The count matrix we worked on above are on continuous bins on the transcript and the test was performed on each bin. To report the final result, we want to merge neighbouring bins that pass a significance cutoff because signals for neighbouring bins are assumed to come from the same locus. We merge the p-value of connecting bins by [fisher's method](https://en.wikipedia.org/wiki/Fisher%27s_method) and report the max beta from neighbouring bins. Besides, We also need to report the genomic location instead of on mRNA location of the bin that passed the cutoff. To do so, call the function:
 ```{r}
-Diff_peak <- reportPoissonGammaMerge(RDM,cutoff = 0.05)
+Diff_peak <- reportPoissonGammaMerge(radar,cutoff = 0.05)
 ```
 The peak is reported at bed12 format with addition column for beta and p value.  
 ```{r}
 head(Diff_peak)
 ```
 ### i). Visualize MeRIP-seq data by sequencing coverage plot.
+
+One of the most straight forward visualization of MeRIP-seq data is the coverage plot. We implemented function to take a `radar` object and plot the mean/median coverage of IP and INPUT for two inferential groups. Here we demonstrate the function using a differential methylated gene reported in above sections.  
+To use the plot function, we need to prepare an GTF annotation in GRanges format. This can be done by `GTF <- rtracklayer::import("path/to/gtf")`. This step only need to be done once in each R session. 
+```{r plotCoverage, fig.width=15,fig.height=5}
+GTF <- rtracklayer::import("~/Database/genome/hg38/hg38_UCSC.gtf")
+plotGeneRADAR(radar,geneName = "SLC25A24", center = median, libraryType = "opposite",GTF = GTF)
+```
+
+**Note** The groupp label *Treat* and *Ctl* is automatically determined by the group vector `X` defined ealier (you can check by `radar$X`). The first factor in `X` is taken as *Ctl* and another group factor will be taken as *Treat*.  
+**Note** The parameter `center = median` define the coverage to be group median. You can also set it to be `center = mean`.  
+
+In some cases, the gene has very long introns that the exon regions becomes too narrow to see in the whole gene plot. We can call the same function with additional parameter `ZoomIn` to define a range in the gene to plot (Note `ZoomIn` range need to be within the gene). 
+
+```{r plotCoverageZoom, fig.width=10,fig.height=5}
+plotGeneRADAR(radar,geneName = "SLC25A24", center = median, libraryType = "opposite",GTF = GTF,ZoomIn = c(108200059,108200308 ) )
+```
+
+From the coverage plot we can see the in the "Treat" group, the m6A peak is significantly decreased. 
 
 
 ## 4. Model
@@ -331,18 +350,21 @@ We use observed fisher information to make the inference for all parameters. The
 
 
 
-# Acknowledgments
+## Acknowledgments
 
-We have benefited in the development of RNADMethyl from the help and
+We have benefited in the development of RADAR from the help and
 feedback of many individuals, including but not limited to: 
 
 
 
-# Session info
+
+## Session info
 
 ```{r sessionInfo}
 sessionInfo()
 ```
 
-# References
+## References
+
+[1] Love, M. I.; Huber, W.; & Anders, S. Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology. 2014 15(12), 550. 
 

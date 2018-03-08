@@ -24,6 +24,7 @@ plotPCA.DESeq2 <- function(data,group = NULL, returnPC = FALSE){
 #' @param m The matrix of count data
 #' @param group The factor levels to color the samples. Should be the save number as the # of matrix columns
 #' @param loglink Logic parameter determine whether to take log of the metrix data. Default is TRUE. If your input matrix is at log scale, use FALSE.
+#' @export
 plotPCAfromMatrix <- function(m,group,loglink = TRUE){
   if(loglink){
     mm <- log(m + 1)

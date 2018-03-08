@@ -1,11 +1,10 @@
-Package: RNADMethyl
+Package: RADAR
 Type: Package
-Title: RNADMethyl
-Version: 0.1.1
-Author: Zijie Zhang, Mengjie Chen
+Title: RADAR
+Version: 0.1.2
+Author: Zijie Zhang, Chuan He, Mengjie Chen
 Maintainer: The package maintainer <scottzjzhang@uchicago.edu>
-Description: The package included a pipe line to analyze MeRIP-seq data for differential methylation
-    Use four spaces when indenting paragraphs within the Description.
+Description: The package included a pipe line to analyze MeRIP-seq data for differential methylation. 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
