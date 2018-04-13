@@ -1,5 +1,5 @@
 #' @title plotHeatMap
-#' @param x The RNADmethyl object
+#' @param x The RADAR object
 #' @param covariates The covariates matrix, must be numerical matrix.
 #' @export
 plotHeatMap <- function(x,covariates=NULL){

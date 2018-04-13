@@ -66,7 +66,7 @@ getAveCoverage <- function(geneModel,bamFiles,geneName,size.factor, libraryType 
     locus$width = ZoomIn[2] - ZoomIn[1] + 1
   }
   covs <- sapply(bamFiles,getCov,locus=locus, libraryType = libraryType)
-  covs <- covs/size.factor
+  covs <- t( t(covs)/size.factor )
   ave.cov <- apply(covs,1, center)
   return(ave.cov)
 }
