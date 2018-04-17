@@ -22,9 +22,25 @@ reportPoissonGammaMerge <- function(x,
   cat("Getting significant bins....\n")
 
   if("p_value" %in% colnames(stats)){
-    sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff,])
+    num_bins <- length( which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff) )
+    if(num_bins < 1 ){
+      stop("There is no bin passing the threshold...\n No differential peaks can be reported at current cutoff...")
+    }else if(num_bins == 1){
+      sig.bins <- rownames(stats)[which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff)]
+    }else{
+      sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff,])
+    }
+    
   }else if("p_value3" %in% colnames(stats) ){
-    sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff,])
+    num_bins <- length( which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff) )
+    if(num_bins < 1 ){
+      stop("There is no bin passing the threshold...\n No differential peaks can be reported at current cutoff...")
+    }else if(num_bins == 1){
+      sig.bins <- rownames(stats)[which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff)]
+    }else{
+      sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff,])
+    }
+    
     colnames(stats)[which(colnames(stats) == "p_value3")] = "p_value"
     colnames(stats)[which(colnames(stats) == "beta1")] = "beta"
   }else{
