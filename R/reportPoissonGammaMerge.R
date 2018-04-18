@@ -32,11 +32,11 @@ reportPoissonGammaMerge <- function(x,
     }
     
   }else if("p_value3" %in% colnames(stats) ){
-    num_bins <- length( which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff) )
+    num_bins <- length( which(stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff) )
     if(num_bins < 1 ){
       stop("There is no bin passing the threshold...\n No differential peaks can be reported at current cutoff...")
     }else if(num_bins == 1){
-      sig.bins <- rownames(stats)[which(stats[,"padj"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff)]
+      sig.bins <- rownames(stats)[which(stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff)]
     }else{
       sig.bins <- rownames(stats[stats[,"padj"] < cutoff & abs(stats[,"beta1"] )> Beta_cutoff,])
     }
