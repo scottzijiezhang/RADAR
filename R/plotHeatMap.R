@@ -1,22 +1,31 @@
 #' @title plotHeatMap
 #' @param x The RADAR object
 #' @param covariates The covariates matrix, must be numerical matrix.
+#' @param topBins The number of top bins to plot the heat map. Default is 5000. 
 #' @export
-plotHeatMap <- function(x,covariates=NULL){
+plotHeatMap <- function(x,covariates=NULL,topBins = 5000){
   
   if(! "all.est" %in% names(x)){stop("Need to run diffIP before plotHeatMap...")}
   
+  if(nrow(x$ip_adjExpr_filtered) < topBins){
+    topBins <- nrow(x$ip_adjExpr_filtered)
+    cat( paste0("Only ",topBins," bins passed filter...\n") )
+    cat( paste0("Plot heat map for top ",topBins," bins ranked by differential test p value...\n") )
+  }else{
+    cat( paste0("Plot heat map for top ",topBins," bins ranked by differential test p value...\n") )
+  }
+  
   if(is.null(covariates) ){
-    topBins <-  x$ip_adjExpr_filtered[order(x$all.est[,"padj"],decreasing = F)[1:5000],]
+    topBins <-  x$ip_adjExpr_filtered[order(x$all.est[,"padj"],decreasing = F)[1:topBins],]
     log_topBins <- log(topBins+1)
     log_topBins_center <- t(apply(log_topBins,1,function(x){x-mean(x)})  )
     
     dist.pear <- function(x) as.dist(1-cor(t(x)))
     hclust.ave <- function(x) hclust(x, method="average")
-    gplots::heatmap.2(log_topBins_center,scale="row",trace="none",labRow=NA,main = "Top Bins ranked by p value for IP counts",
+    gplots::heatmap.2(log_topBins_center,scale="row",trace="none",labRow=NA,main = "Methylation level of top-lowest p value bins",
                       distfun=dist.pear, hclustfun=hclust.ave,col=rev(RColorBrewer::brewer.pal(9,"RdBu")))
   }else{
-    topBins <-  x$ip_adjExpr_filtered[order(x$all.est[,"padj"],decreasing = F)[1:5000],]
+    topBins <-  x$ip_adjExpr_filtered[order(x$all.est[,"padj"],decreasing = F)[1:topBins],]
     log_topBins <- log(topBins+1)
     
     registerDoParallel(cores = 4)
@@ -32,7 +41,7 @@ plotHeatMap <- function(x,covariates=NULL){
     
     dist.pear <- function(x) as.dist(1-cor(t(x)))
     hclust.ave <- function(x) hclust(x, method="average")
-    gplots::heatmap.2(cov.out,scale="row",trace="none",labRow=NA,main = "Top Bins ranked by p value for IP counts",
+    gplots::heatmap.2(cov.out,scale="row",trace="none",labRow=NA,main = "Methylation level of top-lowest p value bins\n(Covariates regressed out)",
                       distfun=dist.pear, hclustfun=hclust.ave,col=rev(RColorBrewer::brewer.pal(9,"RdBu")))
     
   }
