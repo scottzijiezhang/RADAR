@@ -38,6 +38,10 @@ plotPCAfromMatrix <- function(m,group,loglink = TRUE){
   makeLab <- function(x,pc) paste0("PC",pc,": ",round(x,digits = 2),"% variance")
   ggplot(data = pca.df,aes(PC1,PC2,label = rownames(pca.df),colour=group) )+geom_text()+ xlab(makeLab(props[1],1)) + ylab(makeLab(props[2],2))+
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-                       panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+                       panel.grid.minor = element_blank(),axis.line = element_line(colour = "black",size = 1),
+                       axis.title.x=element_text(size=20, face="bold", hjust=0.5,family = "arial"),
+                       axis.title.y=element_text(size=20, face="bold", vjust=0.4, angle=90,family = "arial"),
+                       legend.title=element_text(size = 15,face = "bold"),legend.text = element_text(size = 18, face = "bold",family = "arial"),
+                       axis.text.x = element_text(size = 15,face = "bold",family = "arial") ,axis.text.y = element_text(size = 15,face = "bold",family = "arial")  )
 
 }

@@ -16,11 +16,11 @@ filterBins <- function(
   ngroup2 <- length(group2)
   
   ## filter the bin with low counts
-  filtered <- .groupMeanFilter( x = x$ip_adjExpr , X = X, cuttoff = minCountsCutOff )
+  keep.rowname <- rownames( .groupMeanFilter( x = x$norm.ip[rownames(x$ip_adjExpr),] , X = X, cuttoff = minCountsCutOff ) )
+  filtered <- x$ip_adjExpr[keep.rowname,]
   cat(paste("Bins with average counts lower than ",minCountsCutOff," in both groups have been removed...\n"))
   ###############################
   
-  keep.rowname <- rownames(filtered)
   input <- x$norm.input[keep.rowname,]
   ip <- x$norm.ip[keep.rowname,]
   input <- t(apply(input,1,noZero))
@@ -51,10 +51,8 @@ filterBins <- function(
   X, ## The vector of grouping (study design)
   cuttoff ## the cutoff of min window read counts for furthur analysis
 ){
-  tmp <- matrix(nrow = dim(x)[1], ncol = 2)
-  for( i in 1:dim(x)[1]){
-    tmp[i,] <- tapply(as.numeric(x[i,]),X,mean)
-  }
+  tmp <-  t( apply(x,1,tapply,X,mean) )
+  
   return( x[which(apply(tmp,1,max) > cuttoff),] )
 }
 
