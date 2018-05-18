@@ -95,9 +95,6 @@ getCov <- function(bf,locus, libraryType ){
   exon.current <- reduce( geneModel[geneName][[1]] )
   startCodon <-  reduce( gtf_grange[gtf_grange$type == "start_codon" & gtf_grange$gene_id == geneName] )
   stopCodon <- reduce( gtf_grange[gtf_grange$type == "stop_codon" & gtf_grange$gene_id == geneName] )
-  ## remove non_cononical seq_level
-  startCodon <- keepSeqlevels(startCodon, seqlevels(exon.current), pruning.mode = "coarse")
-  stopCodon <- keepSeqlevels(stopCodon, seqlevels(exon.current), pruning.mode = "coarse")
   if(as.logical(strand(exon.current)[1]=="-")){
     startCodon <- startCodon[which.max( start(startCodon) )]
     stopCodon <- stopCodon[which.min( start(stopCodon) )]
@@ -130,8 +127,11 @@ getCov <- function(bf,locus, libraryType ){
       for(i in 1:length(anno.intron)){
         anno.intron[i] <- paste0("annotate(\"segment\", x =", df.exon$end[i] ,", xend =", df.exon$start[i+1] ,", y = -0.05*yscale, yend = -0.05*yscale, alpha = .99, colour = \"black\")")
       }
+      p <- paste( paste(anno.exon,collapse = "+"), paste(anno.intron,collapse = "+"), sep = "+")
+    }else{
+      p <-paste(anno.exon,collapse = "+")
     }
-    p <- paste( paste(anno.exon,collapse = "+"), paste(anno.intron,collapse = "+"), sep = "+")
+    
     
     return(p)
     
@@ -177,6 +177,7 @@ getCov <- function(bf,locus, libraryType ){
   }
   
 }
+
 
 
 #' @title plotGeneMonster
