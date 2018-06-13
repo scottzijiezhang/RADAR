@@ -1,2 +1,4 @@
+importFrom(Rcpp, sourceCpp)
+useDynLib(RADAR)
 exportPattern("^[[:alpha:]]+")
 

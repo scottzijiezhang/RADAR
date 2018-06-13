@@ -47,7 +47,7 @@ diffIP <- function(
       coef <- model1$coefficients
       mu2 <- coef[1]
       beta <- coef[2]
-      est <- try(unlist(PoissonGamma::PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all.est <- rbind(all.est, est)
         all.id <- c(all.id, kk)
@@ -108,7 +108,7 @@ diffIP <- function(
       aa <- unlist(summary( lm( design.multiBeta ) )$coefficients[, 1])
       mu2 <- aa[1]
       beta <- aa[2:(ncol(X.all)+1 )]
-      est <- try(unlist(PoissonGamma::PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all1 <- rbind(all1, est)
         all.id <- c(all.id, kk)
@@ -187,7 +187,7 @@ diffIP_parallel <- function(x,
       coef <- model1$coefficients
       mu2 <- coef[1]
       beta <- coef[2]
-      est <- try(unlist(PoissonGamma::PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) == "try-error"){
         error.id <- c(error.id, kk)
       }
@@ -258,7 +258,7 @@ diffIP_parallel <- function(x,
       aa <- unlist(summary( lm( y~.,data=lmY ) )$coefficients[, 1])
       mu2 <- aa[1]
       beta <- aa[2:(ncol(X.all)+1 )]
-      est <- try(unlist(PoissonGamma::PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 10, down = 0.1,psi_cutoff = maxPsi)))
       if(class(est) == "try-error"){
         error.id <- c(error.id, kk)
       }

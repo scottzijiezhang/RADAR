@@ -3,7 +3,7 @@
 #' @param countdata Matrix of read count.
 #' @param pheno Matrix defining the grouping of the samples. 
 #' @param covariates Optional matrix defining the covariates.
-#' #' @param normalizeLib Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.
+#' @param normalizeLib Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.
 #' @export DESeq.res Test statistics of DESeq2.
 DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLib = F){
   library(DESeq2)

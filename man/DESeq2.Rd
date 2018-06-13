@@ -12,8 +12,9 @@ DESeq2(countdata, pheno, covariates = NULL, Dispplot = FALSE,
 
 \item{pheno}{Matrix defining the grouping of the samples.}
 
-\item{covariates}{Optional matrix defining the covariates.
-#' @param normalizeLib Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.}
+\item{covariates}{Optional matrix defining the covariates.}
+
+\item{normalizeLib}{Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.}
 }
 \description{
 A wrapper function to call DESeq2
