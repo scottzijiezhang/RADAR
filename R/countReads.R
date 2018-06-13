@@ -4,23 +4,25 @@
 #' @title countReads
 #' @param samplenames The names of each sample (prefix for bam files)
 #' @param gtf The gtf format gene annotation file
-#' @param shift Number of bp to shift when counting the reads. This is usually half of the fragment length.
+#' @param fragmentLength The RNA fragment length (insert size of the library).
 #' @param modification
 #' @param bamFolder Path to the folder where bam file locates
 #' @param binSize The size of consecutive bins to slice the transcripts
 #' @param threads The number of threads to use for hyperthreading
 #' @param strandToKeep According to library preparation protocol, choose which strand to count. Stranded RNA library usually seq the "ooposite" strand. Small RNA library seq the "same" strand.
 #' @param outputDir The directory to save output files
+#' @param paired Logical indicating whether the input bam files are from paired end sequencing. Default is FALSE. If using paired end data, the read length will be estimated from the data and only good mate are counted.
 #' @export
 countReads<-function(
   samplenames,# file name of samples
   gtf, # gtf file used for peak calling
-  shift = 75, #number of nucleotide shifted at peak calling
+  fragmentLength = 150, 
   bamFolder,
   outputDir=NA,
   modification = "m6A",
   binSize = 50,
   strandToKeep = "opposite",
+  paired = FALSE,
   threads = 1
 ){
 #  library(Rsamtools)
@@ -116,8 +118,8 @@ countReads<-function(
     #geneRNA2DNA= rbind(geneRNA2DNA,mapping[c("chr","start","end","strand")])
 
     #count reads in all samples
-    ba.IP = sapply(bamPath.IP,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,shift=shift,left=dna.range$start,sliding = slidingStart)
-    ba.input = sapply(bamPath.input,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,shift=shift,left=dna.range$start,sliding = slidingStart)
+    ba.IP = sapply(bamPath.IP,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,fragmentLength=fragmentLength,left=dna.range$start,sliding = slidingStart, binSize = binSize, paired = paired)
+    ba.input = sapply(bamPath.input,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,fragmentLength=fragmentLength,left=dna.range$start,sliding = slidingStart, binSize = binSize, paired = paired)
 
     if(is.vector(ba.IP) ){# if there is only one window for this gene, make it a matrix to avoid bug
       ba.IP = matrix(ba.IP, nrow = 1)

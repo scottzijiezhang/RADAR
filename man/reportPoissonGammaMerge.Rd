@@ -4,7 +4,7 @@
 \alias{reportPoissonGammaMerge}
 \title{reportPoissonGammaMerge}
 \usage{
-reportPoissonGammaMerge(x, cutoff, est = "auto")
+reportPoissonGammaMerge(x, cutoff, Beta_cutoff = 0.5, est = "auto")
 }
 \arguments{
 \item{x}{The RNADMethyl data list}
