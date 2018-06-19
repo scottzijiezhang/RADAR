@@ -190,7 +190,7 @@ getCov <- function(bf,locus, libraryType ){
     return(p)
     
   }else{
-    zoomIn.gr <- cdsRange
+    zoomIn.gr <- exon.new[1]
     ranges(zoomIn.gr) <- IRanges(start = zoomIn[1],end = zoomIn[2])
     exon.zoom <- GenomicRanges::intersect(exon.new, zoomIn.gr)
     cds.current.zoom <- GenomicRanges::intersect(exon.zoom, cds.current)
@@ -200,31 +200,46 @@ getCov <- function(bf,locus, libraryType ){
     cds.id <- unique( queryHits( findOverlaps(exon.zoom.new, cds.current.zoom)) )
     df.exon <- as.data.frame(exon.zoom.new)
     anno.exon <- character(length = length(exon.zoom))
-    for(i in 1:length(exon.zoom.new)){
-      if( i %in% cds.id){
-        anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"black\")" )
-      }else{
-        anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.06*yscale, ymax = -0.04*yscale, alpha = .99, colour = \"black\")")
+    ## add exon plot if # exon > 0
+    if(length(exon.zoom.new) > 0){
+      for(i in 1:length(exon.zoom.new)){
+        if( i %in% cds.id){
+          anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"black\")" )
+        }else{
+          anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.06*yscale, ymax = -0.04*yscale, alpha = .99, colour = \"black\")")
+        }
       }
     }
-    anno.intron <- character(length = length(exon.zoom.new)-1 )
+    
+    ## plot intron when there are more than two exons
+    anno.intron <- character(length = max( length(exon.zoom.new)-1, 0 )  )
     if(length(anno.intron)>0){
       for(i in 1:length(anno.intron)){
         anno.intron[i] <- paste0("annotate(\"segment\", x =", df.exon$end[i] ,", xend =", df.exon$start[i+1] ,", y = -0.05*yscale, yend = -0.05*yscale, alpha = .99, colour = \"black\")")
       }
     }
-    if(start(zoomIn.gr)<start(exon.zoom)[1]){
+    ## When there is only one exon and zoomIn range spans intron
+    if( length(exon.zoom.new) > 0 && start(zoomIn.gr)<start(exon.zoom)[1]){
       anno.intron <- c(paste0("annotate(\"segment\", x =", start(zoomIn.gr) ,", xend =", start(exon.zoom)[1] ,", y = -0.05*yscale, yend = -0.05*yscale, alpha = .99, colour = \"black\")"),
                        anno.intron)
     }
-    if(end(zoomIn.gr) > end(exon.zoom)[length(exon.zoom)]){
+    if( length(exon.zoom.new) > 0 && end(zoomIn.gr) > end(exon.zoom)[length(exon.zoom)] ){
       anno.intron <- c(anno.intron,
                        paste0("annotate(\"segment\", x =", end(exon.zoom)[length(exon.zoom)] ,", xend =", end(zoomIn.gr) ,", y = -0.05*yscale, yend = -0.05*yscale, alpha = .99, colour = \"black\")") )
     }
-    if( length(anno.intron) > 0 ){
+    ## When there is no exon but zoomIn ranges is in intron
+    if( length(exon.zoom.new) == 0 ){
+      anno.intron <- c(anno.intron,
+                       paste0("annotate(\"segment\", x =", start(zoomIn.gr) ,", xend =", end(zoomIn.gr) ,", y = -0.05*yscale, yend = -0.05*yscale, alpha = .99, colour = \"black\")") )
+    }
+    
+    ## combine intron and exon plots
+    if( length(anno.intron) > 0 & length(anno.exon) >0 ){
       p <- paste( paste(anno.exon,collapse = "+"), paste(anno.intron,collapse = "+"), sep = "+")
-    }else{
+    }else if( length(anno.exon) >0 ){
       p <- paste(anno.exon,collapse = "+")
+    }else{
+      p <- paste(anno.intron,collapse = "+")
     }
     
     return(p)

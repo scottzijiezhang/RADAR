@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotGeneRADAR.R
 \name{plotGeneRADAR}
 \alias{plotGeneRADAR}
-\title{plotGeneMonster}
+\title{plotGeneRADAR}
 \usage{
 plotGeneRADAR(readsOut, geneName, libraryType = "opposite", center = "mean",
   GTF, ZoomIn = NULL)
