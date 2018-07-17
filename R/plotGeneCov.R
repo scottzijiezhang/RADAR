@@ -61,7 +61,7 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
   if(adjustExprLevel){
     cov.size <- colSums(INPUT.cov)/mean(colSums(INPUT.cov))
     INPUT.cov <- t(  t(INPUT.cov)/cov.size )
-    IP.cov <- t( t(IP.cov/cov.size) )
+    IP.cov <- t( t(IP.cov)/cov.size )
   }
   
   cov.data <- data.frame(genome_location=rep(as.numeric(rownames(IP.cov) ),length(levels(X))), 
