@@ -72,8 +72,8 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
   
   chr <- unique(as.character(as.data.frame(geneModel[geneName])$seqnames))
   
-  p1 <- "ggplot(data = cov.data,aes(genome_location))+geom_line(aes(y=Input,colour =Group))+geom_ribbon(aes(ymax = IP,ymin=0,fill=Group), alpha = 0.4)+labs(y=\"normalized coverage\",x = paste0( \"Genome location on chromosome: \", chr) )+scale_x_continuous(breaks = round(seq(min(cov.data$genome_location), max(cov.data$genome_location), by = ((max(cov.data$genome_location)-min(cov.data$genome_location))/10) )))+theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(), axis.line = element_line(colour = \"black\"),axis.title = element_text(face = \"bold\"),axis.text = element_text(face = \"bold\") ) + scale_fill_discrete(name=\"IP\") + scale_colour_discrete(name=\"INPUT\")"
+  p1 <- "ggplot(data = cov.data,aes(genome_location))+geom_line(aes(y=Input,colour =Group))+geom_ribbon(aes(ymax = IP,ymin=0,fill=Group), alpha = 0.4)+labs(y=\"normalized coverage\",x = paste0( \"Genome location on chromosome: \", chr) )+scale_x_continuous(breaks = round(seq(min(cov.data$genome_location), max(cov.data$genome_location), by = ((max(cov.data$genome_location)-min(cov.data$genome_location))/10) )),expand = c(0,0))+theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = \"black\"),axis.title = element_text(face = \"bold\"),axis.text = element_text(face = \"bold\") ) + scale_fill_discrete(name=\"IP\") + scale_colour_discrete(name=\"INPUT\") + scale_y_continuous(expand = c(0, 0))"
   
   p2 <- .getGeneModelAnno(geneModel,geneName,GTF,ZoomIn)
   
