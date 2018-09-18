@@ -61,7 +61,7 @@ diffIP <- function(
     }
     
     ##calcualte adjusted p value
-    padj <- p.adjust(all.est[,"p_value"],method = p.adjBy )
+    padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
     all.est <- cbind( all.est, padj )
     
     x <- c(x,list('all.est'=all.est))
@@ -121,7 +121,7 @@ diffIP <- function(
       hist(all1[,"p_value3"],main = "P Values", xlab = "p_value")
     }
     ##calcualte adjusted p value
-    padj <- p.adjust(all1[,"p_value3"],method = p.adjBy )
+    padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
     all1 <- cbind( all1, padj )
     
     x <- c(x,list('all.est'=all1))
@@ -205,7 +205,7 @@ diffIP_parallel <- function(x,
     }
     
     ##calcualte adjusted p value
-    padj <- p.adjust(all.est[,"p_value"],method = p.adjBy )
+    padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
     all.est <- cbind( all.est, padj )
     
     x <- c(x,list('all.est'=all.est))
@@ -274,7 +274,7 @@ diffIP_parallel <- function(x,
       hist(all1[,"p_value3"],main = "P Values", xlab = "p_value")
     }
     ##calcualte adjusted p value
-    padj <- p.adjust(all1[,"p_value3"],method = p.adjBy )
+    padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
     all1 <- cbind( all1, padj )
     
     x <- c(x,list('all.est'=all1))
