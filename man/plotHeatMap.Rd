@@ -4,7 +4,7 @@
 \alias{plotHeatMap}
 \title{plotHeatMap}
 \usage{
-plotHeatMap(x, covariates = NULL, topBins = 5000)
+plotHeatMap(x, covariates = NULL, topBins = "significant", label = NULL)
 }
 \arguments{
 \item{x}{The RADAR object}

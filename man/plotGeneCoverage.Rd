@@ -6,7 +6,7 @@
 \usage{
 plotGeneCoverage(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT, X, geneName,
   geneModel, libraryType = "opposite", center = mean, GTF, ZoomIn = NULL,
-  adjustExprLevel = FALSE, plotSNP = NULL)
+  adjustExprLevel = "none", plotSNP = NULL)
 }
 \arguments{
 \item{size.IP}{The size factor for IP libraries}
@@ -21,7 +21,7 @@ plotGeneCoverage(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT, X, geneName,
 
 \item{GTF}{gtf annotation as GRanges object. Can be obtained by GTF <- rtracklayer::import("xxx.gtf",format = "gtf")}
 
-\item{adjustExprLevel}{Logic parameter determining whether adjust coverage so that input are at "same" expression level.}
+\item{adjustExprLevel}{A size factor representing the pre-IP expression level}
 
 \item{plotSNP}{The option to plot SNP on the figure. Null by default. If want to include SNP in the plot, the parameter needs to ba a dataframe like this:  data.frame(loc= position, anno="A/G")}
 

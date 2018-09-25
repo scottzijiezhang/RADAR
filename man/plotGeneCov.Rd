@@ -4,7 +4,7 @@
 \alias{plotGeneCov}
 \title{plotGeneCov}
 \usage{
-plotGeneCov(readsOut, geneName, libraryType = "opposite", center = "mean",
+plotGeneCov(readsOut, geneName, libraryType = "opposite", center = mean,
   GTF, ZoomIn = NULL, adjustExprLevel = TRUE)
 }
 \arguments{
