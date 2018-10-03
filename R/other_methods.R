@@ -4,7 +4,7 @@
 #' @param pheno Matrix defining the grouping of the samples. 
 #' @param covariates Optional matrix defining the covariates.
 #' @param normalizeLib Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.
-#' @export DESeq.res Test statistics of DESeq2.
+#' @export 
 DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLib = F){
   library(DESeq2)
   ## check they have the numbers of samples
@@ -81,7 +81,7 @@ DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLi
 #' @param pheno Matrix defining the grouping of the samples. 
 #' @param covariates Optional matrix defining the covariates.
 #' @param normalizeLib Logic option to choose whether perform normalization. Default if "FALSE" for normalized count matrix.
-#' @export DESeq.res Test statistics of DESeq2.
+#' @export 
 edgeR <- function(countdata, pheno, covariates=NULL,normalizeLib = FALSE){
   library(edgeR)
   ## check they have the numbers of samples

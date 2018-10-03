@@ -1,11 +1,13 @@
 ## main function that takes a gtf file and bam files to count read for continuous windows
 ### The function requires for each sample, input and IP named for the same prefix (filename). input and IP each have postfix of input.bam/m6A.bam
 #### If multiple IP sample used a shared input library, sharedInput can be specified.
-#' @title countReads
+#' @name countReads
+#' @title quantify reads in consecutive bins
 #' @param samplenames The names of each sample (prefix for bam files)
 #' @param gtf The gtf format gene annotation file
 #' @param fragmentLength The RNA fragment length (insert size of the library).
-#' @param modification
+#' @param modification The middle file name used to differentiate IP sample from Input sample. This should correspond to the file name of BAM files. 
+#' For example, modification="m6A" for BAM files named as "samplenames.m6A.bam". 
 #' @param bamFolder Path to the folder where bam file locates
 #' @param binSize The size of consecutive bins to slice the transcripts
 #' @param threads The number of threads to use for hyperthreading

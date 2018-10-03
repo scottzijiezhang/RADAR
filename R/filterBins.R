@@ -1,7 +1,7 @@
 #' @title filterBins
 #' @param x The RNADMethyl data list
 #' @param minCountsCutOff The minimal read count required in each bin, default is 10. This cutoff
-#' @export x The RNAMethyl data list with filtered ip counts
+#' @export
 filterBins <- function(
   x,
   minCountsCutOff = 10  ## the cutoff of min window read counts for furthur analysis

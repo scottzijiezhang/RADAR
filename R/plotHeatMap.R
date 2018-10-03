@@ -26,7 +26,7 @@ plotHeatMap <- function(x,covariates=NULL,topBins = "significant", label = NULL 
     if(!is.null(label) & length(label) == ncol(log_topBins_center) ){colnames(log_topBins_center) <- label }
     dist.pear <- function(x) as.dist(1-cor(t(x)))
     hclust.ave <- function(x) hclust(x, method="average")
-    gplots::heatmap.2(log_topBins_center,scale="row",trace="none",labRow=NA,main = "Methylation level of top-lowest p value bins",
+    gplots::heatmap.2(log_topBins_center,scale="row",trace="none",labRow=NA,main = "Methylation level of significant bins",
                       distfun=dist.pear, hclustfun=hclust.ave,col=rev(RColorBrewer::brewer.pal(9,"RdBu")))
   }else{
     
@@ -47,7 +47,7 @@ plotHeatMap <- function(x,covariates=NULL,topBins = "significant", label = NULL 
     dist.pear <- function(x) as.dist(1-cor(t(x)))
     hclust.ave <- function(x) hclust(x, method="average")
     if(!is.null(label) & length(label) == ncol(cov.out) ){colnames(cov.out) <- label }
-    gplots::heatmap.2(cov.out,scale="row",trace="none",labRow=NA,main = "Methylation level of top-lowest p value bins\n(Covariates regressed out)",
+    gplots::heatmap.2(cov.out,scale="row",trace="none",labRow=NA,main = "Methylation level of significant bins\n(Covariates regressed out)",
                       distfun=dist.pear, hclustfun=hclust.ave,col=rev(RColorBrewer::brewer.pal(9,"RdBu")))
     
   }

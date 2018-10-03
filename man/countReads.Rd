@@ -2,7 +2,7 @@
 % Please edit documentation in R/countReads.R
 \name{countReads}
 \alias{countReads}
-\title{countReads}
+\title{quantify reads in consecutive bins}
 \usage{
 countReads(samplenames, gtf, fragmentLength = 150, bamFolder,
   outputDir = NA, modification = "m6A", binSize = 50,
@@ -18,6 +18,9 @@ countReads(samplenames, gtf, fragmentLength = 150, bamFolder,
 \item{bamFolder}{Path to the folder where bam file locates}
 
 \item{outputDir}{The directory to save output files}
+
+\item{modification}{The middle file name used to differentiate IP sample from Input sample. This should correspond to the file name of BAM files. 
+For example, modification="m6A" for BAM files named as "samplenames.m6A.bam".}
 
 \item{binSize}{The size of consecutive bins to slice the transcripts}
 

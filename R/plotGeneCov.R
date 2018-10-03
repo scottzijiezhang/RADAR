@@ -53,7 +53,6 @@ plotGeneCov <- function(readsOut, geneName, libraryType = "opposite", center = m
 #' @param GTF gtf annotation as GRanges object. Can be obtained by GTF <- rtracklayer::import("xxx.gtf",format = "gtf")
 #' @param adjustExprLevel A size factor representing the pre-IP expression level 
 #' @param plotSNP The option to plot SNP on the figure. Null by default. If want to include SNP in the plot, the parameter needs to ba a dataframe like this:  data.frame(loc= position, anno="A/G")
-#' @export
 plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneName, geneModel, libraryType = "opposite", center = mean ,GTF,ZoomIn=NULL, adjustExprLevel = "none", plotSNP = NULL){
   
   if( is.numeric(adjustExprLevel) & length(adjustExprLevel) ==length(X) ){

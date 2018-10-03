@@ -2,6 +2,7 @@
 #' @param x The RNADMethyl data list
 #' @param cutoff The p_value cutoff to merge the bin
 #' @param est By default "auto", the function takes estimates from given The RNADMethyl data list. One can also pass a test estimates by assigning it to stats.
+#' @export
 reportPoissonGammaMerge <- function(x,
                                     cutoff,
                                     Beta_cutoff = 0.5,
