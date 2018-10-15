@@ -67,7 +67,7 @@ diffIP <- function(
     x <- c(x,list('all.est'=all.est))
     return(x)
     
-  } else if( !is.null(Covariates) & dim( cbind(X,Covariates) )[1] == length(X)  ){ # include covariates
+  } else if( !is.null(Covariates) & dim( cbind(x$X,Covariates) )[1] == length(X)  ){ # include covariates
     
     if(is.null(exclude) ){ ## running default
       allY <- x$ip_adjExpr_filtered
@@ -211,7 +211,7 @@ diffIP_parallel <- function(x,
     x <- c(x,list('all.est'=all.est))
     return(x)
     
-  } else if( !is.null(Covariates) & dim( cbind(X,Covariates) )[1] == length(X)  ){ # include covariates
+  } else if( !is.null(Covariates) & dim( cbind(x$X,Covariates) )[1] == length(X)  ){ # include covariates
     
     if(is.null(exclude) ){ ## running default
       allY <- x$ip_adjExpr_filtered
