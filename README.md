@@ -12,4 +12,4 @@ Depends: Rsamtools, GenomicFeatures (>= 1.14.5), BH, Rcpp
 
 ### How to use
 
-Please refer to the tutorial of analyzieng RIP-seq with RADAR [here](https://scottzijiezhang.github.io/RADARmannual/RADAR.html)
+Please see the manual page for more details [here](https://scottzijiezhang.github.io/RADARmannual/)
