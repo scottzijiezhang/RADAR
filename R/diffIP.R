@@ -1,7 +1,7 @@
 #' @title diffIP
 #' @param x The RNADMethyl data list
 #' @param Covariates Matrix of covariates to include in the PoissonGamma test. Default is NULL.
-#' @param p.adjBy The method used to adjust for the p value. Default is 'fdr'. Can be "bonferroni","BY","fdr".
+#' @param p.adjBy The method used to adjust for the p value. Default is "qvalue". Can be "qvalue","bonferroni","BY","fdr".
 #' @param exclude Names of samples to exclude (as outlier) in the test. Default is NULL
 #' @param maxPsi The cutoff value for random effect parameter Psi estimation
 #' @export
@@ -61,8 +61,13 @@ diffIP <- function(
     }
     
     ##calcualte adjusted p value
-    padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
-    all.est <- cbind( all.est, padj )
+    if(p.adjBy == "qvalue"){
+      padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
+      all.est <- cbind( all.est, padj )
+    }else{
+      padj <- p.adjust(all.est[,"p_value"], method = p.adjBy )
+      all.est <- cbind( all.est, padj )
+    }
     
     x <- c(x,list('all.est'=all.est))
     return(x)
@@ -120,9 +125,16 @@ diffIP <- function(
     if(plotPvalue){ # plot the distribution of p values
       hist(all1[,"p_value3"],main = "P Values", xlab = "p_value")
     }
+    
     ##calcualte adjusted p value
-    padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
-    all1 <- cbind( all1, padj )
+    if(p.adjBy == "qvalue"){
+      padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
+      all1 <- cbind( all1, padj )
+    }else{
+      padj <- p.adjust(all1[,"p_value3"], method = p.adjBy )
+      all1 <- cbind( all1, padj )
+    }
+    
     
     x <- c(x,list('all.est'=all1))
     return(x)
@@ -136,7 +148,7 @@ diffIP <- function(
 #' @title diffIP_parallel
 #' @param x The RNADMethyl data list
 #' @param Covariates Matrix of covariates to include in the PoissonGamma test. Default is NULL.
-#' @param p.adjBy The method used to adjust for the p value. Default is 'fdr'. Can be "bonferroni","BY","fdr".
+#' @param p.adjBy The method used to adjust for the p value. Default is "qvalue". Can be "qvalue","bonferroni","BY","fdr".
 #' @param exclude Names of samples to exclude (as outlier) in the test. Default is NULL
 #' @param maxPsi The cutoff value for random effect parameter Psi estimation
 #' @param thread The number threads to run in parallel
@@ -205,8 +217,13 @@ diffIP_parallel <- function(x,
     }
     
     ##calcualte adjusted p value
-    padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
-    all.est <- cbind( all.est, padj )
+    if(p.adjBy == "qvalue"){
+      padj <- qvalue::qvalue(all.est[,"p_value"])$qvalue
+      all.est <- cbind( all.est, padj )
+    }else{
+      padj <- p.adjust(all.est[,"p_value"], method = p.adjBy )
+      all.est <- cbind( all.est, padj )
+    }
     
     x <- c(x,list('all.est'=all.est))
     return(x)
@@ -273,9 +290,15 @@ diffIP_parallel <- function(x,
     if(plotPvalue){ # plot the distribution of p values
       hist(all1[,"p_value3"],main = "P Values", xlab = "p_value")
     }
+    
     ##calcualte adjusted p value
-    padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
-    all1 <- cbind( all1, padj )
+    if(p.adjBy == "qvalue"){
+      padj <- qvalue::qvalue(all1[,"p_value3"])$qvalue
+      all1 <- cbind( all1, padj )
+    }else{
+      padj <- p.adjust(all1[,"p_value3"], method = p.adjBy )
+      all1 <- cbind( all1, padj )
+    }
     
     x <- c(x,list('all.est'=all1))
     return(x)
