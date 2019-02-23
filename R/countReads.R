@@ -18,22 +18,22 @@
 countReads<-function(
   samplenames,# file name of samples
   gtf, # gtf file used for peak calling
-  fragmentLength = 150, 
+  fragmentLength = 150,
   bamFolder,
   outputDir=NA,
   modification = "m6A",
   binSize = 50,
   strandToKeep = "opposite",
   paired = FALSE,
-  threads = 1
+  threads = 1,
+  saveOutput = FALSE
 ){
-#  library(Rsamtools)
-#  library(GenomicFeatures)
+  
   ##read bam files
   bamPath.input = paste(bamFolder,"/",samplenames,".input.bam",sep="")
   bamPath.IP = paste(bamFolder,"/",samplenames,".",modification,".bam",sep="")
   no.samples = length(samplenames)
-
+  
   if( !all(file.exists(bamPath.input)) ) stop( "input bam file missing!!!" )
   if( !all(file.exists(bamPath.IP)) ) stop( "IP bam file missing!!!" )
   num_bam_files <- length(bamPath.input)
@@ -49,27 +49,27 @@ countReads<-function(
       indexBam(IPfile)
     }
   }
-
+  
   ## create output directory
   dir.create(outputDir, showWarnings = FALSE, recursive = TRUE)
-
+  
   ## This step removes ambiguous annotations and returns gene model
   cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
   geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
   cat("Gene model obtained from gtf file...\n")
-
+  
   no.genes=length(geneGRList)## define number of genes
-
+  
   cat("counting reads for each genes, this step may takes a few hours....\n")
   start_time <- Sys.time()
   registerDoParallel( cores = threads)
   cat(paste("Hyper-thread registered:",getDoParRegistered(),"\n"))
   cat(paste("Using",getDoParWorkers(),"thread(s) to count reads in continuous bins...\n"))
   reads <- foreach(i = 1:no.genes, .combine = rbind) %dopar%{
-
+    
     geneName = names(geneGRList)[i]
     geneModel =reduce( geneGRList[geneName][[1]] )## merge overlapping exons
-
+    
     # DNA location to gene location conversion
     df.geneModel= as.data.frame(geneModel) ##data frame of gene model
     dna.range = as.data.frame(range(geneModel))
@@ -80,10 +80,10 @@ countReads<-function(
     for (j in 1:no.exon){DNA2RNA[df.geneModel$start[j]:df.geneModel$end[j]]=1}
     exon.length = sum(DNA2RNA)
     DNA2RNA=cumsum(DNA2RNA)*DNA2RNA
-
+    
     ## skip any gene with smaller than 200bp transcript
     if(exon.length < 200) {return(NULL)}
-
+    
     #creat a corresponding map from RNA to DNA
     #RNA2DNA = 1:exon.length
     #pointer = 1
@@ -92,7 +92,7 @@ countReads<-function(
     #  pointer = pointer + df.geneModel$width[j]
     #}
     #RNA2DNA = RNA2DNA + dna.range$start -1 #back to chromosome coordinates
-
+    
     ## switch strand because stranded RNA library protocol sequence reverse strand
     if(strandToKeep == "opposite"){
       reads.strand = character()
@@ -104,7 +104,7 @@ countReads<-function(
       reads.strand = character()
       if(dna.range$strand == "+"){reads.strand = "-"}else{reads.strand = "+"}
     }
-
+    
     #creat center points of continuous window
     if(exon.length <= binSize){
       slidingStart= exon.length/2
@@ -113,37 +113,37 @@ countReads<-function(
       slidingStart= round(seq(from = binSize/2, to = (exon.length - binSize/2), length.out = ceiling(exon.length/binSize) ) )
       #mapping = data.frame(start = RNA2DNA[slidingStart - binSize/2 +1], end = RNA2DNA[slidingStart + binSize/2 ]  )
     }
-
+    
     #mapping$chr = as.character(dna.range$seqnames)
     #mapping$strand = as.character(dna.range$strand)
     #rownames(mapping) = paste(geneName,slidingStart,sep = ",")
     #geneRNA2DNA= rbind(geneRNA2DNA,mapping[c("chr","start","end","strand")])
-
+    
     #count reads in all samples
     ba.IP = sapply(bamPath.IP,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,fragmentLength=fragmentLength,left=dna.range$start,sliding = slidingStart, binSize = binSize, paired = paired)
     ba.input = sapply(bamPath.input,.countReadFromBam,which = range(geneModel),reads.strand = reads.strand,DNA2RNA = DNA2RNA,fragmentLength=fragmentLength,left=dna.range$start,sliding = slidingStart, binSize = binSize, paired = paired)
-
+    
     if(is.vector(ba.IP) ){# if there is only one window for this gene, make it a matrix to avoid bug
       ba.IP = matrix(ba.IP, nrow = 1)
       ba.input = matrix( ba.input, nrow = 1 )
     }
     ba.counts <- cbind(ba.input,ba.IP)
     rownames(ba.counts) <-  paste(geneName,slidingStart,sep = ",")
-
+    
     ba.counts
   }
   rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
   end_time <- Sys.time()
   cat(paste("Time used to count reads:",difftime(end_time, start_time, units = "mins"),"mins... \n"))
-
+  
   colnames(reads) <- c(paste(samplenames,"input",sep = "-"),paste(samplenames,"IP",sep = "-"))
-
-  saveRDS(reads,paste0(outputDir,"/RNADMethyl_readCounts.RDS"))
   
   
-  data.out <- list('reads' = reads,'binSize' = binSize,'geneModel' = geneGRList,
-                   'bamPath.input' = bamPath.input, 'bamPath.ip' = bamPath.IP,
-                   'samplenames' = samplenames)
+  data.out <- MeRIP(reads = reads, binSize = binSize, gtf = gtf, geneModel = geneGRList, bamPath.input = bamPath.input, bamPath.ip = bamPath.IP, samplenames = samplenames)
+  if(saveOutput){
+    saveRDS(data.out,paste0(outputDir,"/MeRIP_readCounts.RDS"))
+  }
+  
   
   return(data.out)
 }

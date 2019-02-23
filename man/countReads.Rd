@@ -6,7 +6,8 @@
 \usage{
 countReads(samplenames, gtf, fragmentLength = 150, bamFolder,
   outputDir = NA, modification = "m6A", binSize = 50,
-  strandToKeep = "opposite", paired = FALSE, threads = 1)
+  strandToKeep = "opposite", paired = FALSE, threads = 1,
+  saveOutput = FALSE)
 }
 \arguments{
 \item{samplenames}{The names of each sample (prefix for bam files)}
@@ -29,4 +30,7 @@ For example, modification="m6A" for BAM files named as "samplenames.m6A.bam".}
 \item{paired}{Logical indicating whether the input bam files are from paired end sequencing. Default is FALSE. If using paired end data, the read length will be estimated from the data and only good mate are counted.}
 
 \item{threads}{The number of threads to use for hyperthreading}
+}
+\description{
+quantify reads in consecutive bins
 }

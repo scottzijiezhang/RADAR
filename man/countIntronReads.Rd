@@ -20,3 +20,6 @@ countIntronReads(samplenames, gtf, fragmentLength = 150, bamFolder,
 
 \item{outputDir}{The directory to save output files}
 }
+\description{
+countIntronReads
+}

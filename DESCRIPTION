@@ -1,7 +1,7 @@
 Package: RADAR
 Type: Package
 Title: RADAR
-Version: 0.1.5
+Version: 0.2.0
 Author: Zijie Zhang, Chuan He, Mengjie Chen
 Maintainer: The package maintainer <scottzjzhang@uchicago.edu>
 Description: The package included a pipe line to analyze MeRIP-seq data (with biological replicates) for differential methylation. 
@@ -9,7 +9,7 @@ License: GNU General Public License v3.0
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp, RcppArmadillo
-Imports: Rcpp
+Imports: Rcpp, DESeq2
 NeedsCompilation: yes
-Depends: GenomicFeatures, Rsamtools, ggplot2, doParallel, foreach,gplots,RColorBrewer, Rcpp, RcppArmadillo
-RoxygenNote: 6.0.1
+Depends: GenomicFeatures, Rsamtools, ggplot2, doParallel, foreach,gplots,RColorBrewer, Rcpp, RcppArmadillo, qvalue
+RoxygenNote: 6.1.1

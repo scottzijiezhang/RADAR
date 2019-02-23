@@ -13,3 +13,6 @@ plotPCAfromMatrix(m, group, loglink = TRUE)
 
 \item{loglink}{Logic parameter determine whether to take log of the metrix data. Default is TRUE. If your input matrix is at log scale, use FALSE.}
 }
+\description{
+plotPCAfromMatrix
+}

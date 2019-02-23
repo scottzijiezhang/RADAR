@@ -1,46 +1,4 @@
 
-#' @title plotGeneCov
-#' @param readsOut The data list from countReads and other analysis.
-#' @param geneName The gene symbol to be ploted.
-#' @param GTF The GRanges object containing gtf annotation. Can obtain by rtracklayer::import("file.gtf", format= "gtf").
-#' @param libraryType Specify whether the library is the same or opposite strand of the original RNA molecule. Default is "opposite".
-#' @param center Specify the method to calculate average coverage of each group. Could be mean or median. 
-#' @param ZoomIn c(start,end) The coordinate to zoom in at the gene to be ploted.
-#' @param adjustExprLevel logical parameter. Specify whether normalize the two group so that they have similar expression level. 
-#' @export
-plotGeneCov <- function(readsOut, geneName, libraryType = "opposite", center = mean, GTF, ZoomIn = NULL, adjustExprLevel = TRUE){
-  
-  if(adjustExprLevel){
-    adj<- readsOut$geneSum[geneName,]/mean(readsOut$geneSum[geneName,])
-  }else{
-    adj <- "none"
-  }
-  
-  if("X" %in% names(readsOut) ){
-    X <- factor(readsOut$X)
-    plotGeneCoverage(IP_BAMs = readsOut$bamPath.ip,
-                   INPUT_BAMs = readsOut$bamPath.input,
-                   size.IP = readsOut$sizeFactor$ip,
-                   size.INPUT = readsOut$sizeFactor$input,
-                   X, geneName,
-                   geneModel = readsOut$geneModel,
-                   libraryType, center  ,GTF,ZoomIn, adjustExprLevel = adj, plotSNP = NULL  )+
-    theme(plot.title = element_text(hjust = 0.5,size = 15,face = "bold"),legend.title =  element_text(hjust = 0.5,size = 13,face = "bold"),legend.text =  element_text(size = 12,face = "bold"))
-  }else{
-    plotGeneCoverage(IP_BAMs = readsOut$bamPath.ip,
-                    INPUT_BAMs = readsOut$bamPath.input,
-                    size.IP = readsOut$sizeFactor$ip,
-                    size.INPUT = readsOut$sizeFactor$input,
-                    rep("x",length(readsOut$samplenames)), geneName,
-                    geneModel = readsOut$geneModel,
-                    libraryType, center  ,GTF,ZoomIn, adjustExprLevel =adj , plotSNP = NULL  )+
-      theme(plot.title = element_text(hjust = 0.5,size = 15,face = "bold"),legend.position="none" )
-  }
-  
-  
-}
-
-
 
 #' @title plotGeneCoverage
 #' @param IP_BAM The bam files for IP samples
@@ -88,8 +46,8 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
   
   chr <- unique(as.character(as.data.frame(geneModel[geneName])$seqnames))
   
-  p1 <- "ggplot(data = cov.data,aes(genome_location))+geom_line(aes(y=Input,colour =Group))+geom_ribbon(aes(ymax = IP,ymin=0,fill=Group), alpha = 0.4)+labs(y=\"normalized coverage\",x = paste0( \"Genome location on chromosome: \", chr) )+scale_x_continuous(breaks = round(seq(min(cov.data$genome_location), max(cov.data$genome_location), by = ((max(cov.data$genome_location)-min(cov.data$genome_location))/10) )),expand = c(0,0))+theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(), axis.line = element_line(colour = \"black\"),axis.title = element_text(face = \"bold\"),axis.text = element_text(face = \"bold\") ) + scale_fill_discrete(name=\"IP\") + scale_colour_discrete(name=\"INPUT\") + scale_y_continuous(expand = c(0, 0))"
+  p1 <- "ggplot(data = cov.data,aes(genome_location))+geom_line(aes(y=Input,colour =Group))+geom_ribbon(aes(ymax = IP,ymin=0,fill=Group), alpha = 0.4)+labs(y=\"Normalized coverage\",x = paste0( chr) )+scale_x_continuous(breaks = round(seq(min(cov.data$genome_location), max(cov.data$genome_location), by = ((max(cov.data$genome_location)-min(cov.data$genome_location))/10) )),expand = c(0,0))+theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = \"black\", size = 1),axis.title = element_text(face = \"bold\", size = 16),axis.text = element_text(face = \"bold\", colour = \"black\", size = 15) ) + scale_fill_discrete(name=\"IP\") + scale_colour_discrete(name=\"INPUT\") + scale_y_continuous(expand = c(0, 0))"
   
   p2 <- .getGeneModelAnno(geneModel,geneName,GTF,ZoomIn)
   
@@ -102,7 +60,7 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
     if(plotSNP$loc >max(cov.data$genome_location) ){
       
       plotSNP_new <- max(cov.data$genome_location) + 0.025*length(cov.data$genome_location)
-      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new +2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
+      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new + 2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
       annotate(\"text\", ,x=plotSNP_new, y = -0.1*yscale, label= paste0(  chr,\":\",as.character(plotSNP$loc)), alpha = .99, colour = \"black\")+
       annotate(\"text\", ,x=plotSNP_new, y = 0, label=as.character(plotSNP$anno), alpha = .99, colour = \"blue\")"
       p <- paste(p1,p2,p3,sep = "+")
@@ -110,7 +68,7 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
     }else if( plotSNP$loc<min(cov.data$genome_location) ){
       
       plotSNP_new <- max(cov.data$genome_location) - 0.025*length(cov.data$genome_location)
-      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new +2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
+      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new + 2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
       annotate(\"text\", ,x=plotSNP_new, y = -0.1*yscale, label= paste0(  chr,\":\",as.character(plotSNP$loc)), alpha = .99, colour = \"black\")+
       annotate(\"text\", ,x=plotSNP_new, y = 0, label=as.character(plotSNP$anno), alpha = .99, colour = \"blue\")"
       p <- paste(p1,p2,p3,sep = "+")
@@ -127,6 +85,100 @@ plotGeneCoverage <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneNam
 }
 
 
+
+#' @title plotGeneCoverageSplit
+#' @param IP_BAM The bam files for IP samples
+#' @param INPUT_BAM The bam files for INPUT samples
+#' @param size.IP The size factor for IP libraries
+#' @param size.INPUT The size factor for INPUT libraries
+#' @param geneName The name (as defined in gtf file) of the gene you want to plot
+#' @param geneModel The gene model generated by gtfToGeneModel() function
+#' @param libraryType "opposite" for mRNA stranded library, "same" for samll RNA library
+#' @param GTF gtf annotation as GRanges object. Can be obtained by GTF <- rtracklayer::import("xxx.gtf",format = "gtf")
+#' @param adjustExprLevel A size factor representing the pre-IP expression level 
+#' @param plotSNP The option to plot SNP on the figure. Null by default. If want to include SNP in the plot, the parameter needs to ba a dataframe like this:  data.frame(loc= position, anno="A/G")
+plotGeneCoverageSplit <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, geneName, geneModel, libraryType = "opposite", center = mean ,GTF,ZoomIn=NULL, adjustExprLevel = "none", plotSNP = NULL, Names ){
+  
+  if( is.numeric(adjustExprLevel) & length(adjustExprLevel) ==length(X) ){
+    ## add adj.expr.level to size factors
+    size.INPUT.adj <- size.INPUT*adjustExprLevel
+    size.IP.adj <- size.IP*adjustExprLevel
+    registerDoParallel( length(levels(X)) )
+    INPUT.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+      getAveCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT.adj[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
+    }
+    IP.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+      getAveCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP.adj[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
+    }
+    rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
+    
+  }else{
+    registerDoParallel( length(levels(X)) )
+    INPUT.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+      getAllCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
+    }
+    IP.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+      getAllCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
+    }
+    rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
+  }
+  
+  cov.data <- data.frame(genome_location=rep(as.numeric(rownames(IP.cov) ),length( X )), 
+                         IP=c(IP.cov),Input=c(INPUT.cov),
+                         Group = factor( rep( X ,rep(nrow(IP.cov),length( X ) ) ), levels = levels(X) ),
+                         Indiv = rep(Names, rep(nrow(IP.cov),length( X ) )  ),
+                         Index = rep( unlist(sapply(table(X), function(x) 1:x ) ), rep(nrow(IP.cov),length( X ) )  )
+  )
+  
+  yscale <- max(IP.cov,INPUT.cov)*0.7
+  
+  chr <- geneName
+  
+  p1 <- "ggplot(data = cov.data,aes(genome_location))+geom_line(aes(y=Input),colour = \"#00BFC4\")+geom_ribbon(aes(ymax = IP,ymin=0),fill= \"#F8766D\", alpha = 0.4)+labs(y=\"Normalized coverage\",x = paste0( chr) )+facet_grid(Index~Group) +scale_x_continuous(breaks = round(seq(min(cov.data$genome_location), max(cov.data$genome_location), by = ((max(cov.data$genome_location)-min(cov.data$genome_location))/4) )[-c(1,5)] ),expand = c(0,0))+theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),strip.text.x = element_text(face = \"bold\", size = 18),strip.text.y = element_text(face = \"bold\", size = 14) , axis.line = element_line(colour = \"black\", size = 1),axis.title = element_text(face = \"bold\", size = 16),axis.text = element_text(face = \"bold\", colour = \"black\", size = 15) ) + scale_fill_discrete(name=\"IP\") + scale_colour_discrete(name=\"INPUT\") + scale_y_continuous(expand = c(0, 0)) +geom_text(aes(label = Indiv, x = mean(genome_location), y = yscale/0.7*0.88 ))"
+  
+  
+  p2 <- .getGeneModelAnno(geneModel,geneName,GTF,ZoomIn)
+  
+  ## handle the option of plot the SNP in the gene model. 
+  if(is.null(plotSNP) ){
+    p <- paste(p1,p2,sep = "+")
+  }else{
+    
+    ## if the SNP is outside of the gene
+    if(plotSNP$loc >max(cov.data$genome_location) ){
+      
+      plotSNP_new <- max(cov.data$genome_location) + 0.025*length(cov.data$genome_location)
+      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new + 2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
+      annotate(\"text\", ,x=plotSNP_new, y = -0.1*yscale, label= paste0(  chr,\":\",as.character(plotSNP$loc)), alpha = .99, colour = \"black\")+
+      annotate(\"text\", ,x=plotSNP_new, y = 0, label=as.character(plotSNP$anno), alpha = .99, colour = \"blue\")"
+      p <- paste(p1,p2,p3,sep = "+")
+      
+    }else if( plotSNP$loc<min(cov.data$genome_location) ){
+      
+      plotSNP_new <- max(cov.data$genome_location) - 0.025*length(cov.data$genome_location)
+      p3 <- "annotate(\"rect\",xmin = ( plotSNP_new -2 ), xmax = ( plotSNP_new + 2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
+      annotate(\"text\", ,x=plotSNP_new, y = -0.1*yscale, label= paste0(  chr,\":\",as.character(plotSNP$loc)), alpha = .99, colour = \"black\")+
+      annotate(\"text\", ,x=plotSNP_new, y = 0, label=as.character(plotSNP$anno), alpha = .99, colour = \"blue\")"
+      p <- paste(p1,p2,p3,sep = "+")
+      
+    }else{ ## if the SNP is within the gene
+      p3 <- "annotate(\"rect\",xmin = (plotSNP$loc-2 ), xmax = ( plotSNP$loc+2 ) , ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"red\")+
+      annotate(\"text\", ,x=plotSNP$loc, y = -0.1*yscale, label=as.character(plotSNP$anno), alpha = .99, colour = \"blue\")"
+      p <- paste(p1,p2,p3,sep = "+")
+    }
+    
+  }
+  
+  eval(parse( text = p ))
+  
+}
+
+
+
+
+
+
 ## helper function to get average coverage of a gene of multiple samples
 getAveCoverage <- function(geneModel,bamFiles,geneName,size.factor, libraryType = libraryType, center ,ZoomIn){
   locus <- as.data.frame( range(geneModel[geneName][[1]]) )
@@ -141,6 +193,21 @@ getAveCoverage <- function(geneModel,bamFiles,geneName,size.factor, libraryType 
   ave.cov <- apply(covs,1, center)
   return(ave.cov)
 }
+
+getAllCoverage <- function(geneModel,bamFiles,geneName,size.factor, libraryType = libraryType, center ,ZoomIn){
+  locus <- as.data.frame( range(geneModel[geneName][[1]]) )
+  if(is.null(ZoomIn)){
+  }else{
+    locus$start = ZoomIn[1]
+    locus$end = ZoomIn[2]
+    locus$width = ZoomIn[2] - ZoomIn[1] + 1
+  }
+  covs <- sapply(bamFiles,getCov,locus=locus, libraryType = libraryType)
+  covs <- t( t(covs)/size.factor )
+  
+  return(covs)
+}
+
 
 getCov <- function(bf,locus, libraryType ){
   s_param <- ScanBamParam(which = GRanges(locus$seqnames,IRanges(locus$start,locus$end)))
@@ -188,9 +255,9 @@ getCov <- function(bf,locus, libraryType ){
     anno.intron <- character(length = length(exon.new)-1 )
     for(i in 1:length(exon.new)){
       if( i %in% cds.id){
-        anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"black\")" )
+        anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.099*yscale, ymax = -0.001*yscale, alpha = .99, colour = \"black\")" )
       }else{
-        anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.06*yscale, ymax = -0.04*yscale, alpha = .99, colour = \"black\")")
+        anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.065*yscale, ymax = -0.035*yscale, alpha = .99, colour = \"black\")")
       }
     }
     if(length(anno.intron)>0){
@@ -220,9 +287,9 @@ getCov <- function(bf,locus, libraryType ){
     if(length(exon.zoom.new) > 0){
       for(i in 1:length(exon.zoom.new)){
         if( i %in% cds.id){
-          anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.08*yscale, ymax = -0.02*yscale, alpha = .99, colour = \"black\")" )
+          anno.exon[i] <- paste0("annotate(\"rect\", xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.09*yscale, ymax = -0.01*yscale, alpha = .99, colour = \"black\")" )
         }else{
-          anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.06*yscale, ymax = -0.04*yscale, alpha = .99, colour = \"black\")")
+          anno.exon[i] <- paste0("annotate(\"rect\",xmin =",df.exon$start[i] ,", xmax = ",df.exon$end[i] ,", ymin = -0.065*yscale, ymax = -0.035*yscale, alpha = .99, colour = \"black\")")
         }
       }
     }
