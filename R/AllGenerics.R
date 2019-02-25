@@ -122,7 +122,7 @@ setGeneric("select",  function(object, samples){standardGeneric("select")})
 setGeneric("results", function(object){standardGeneric("results")})
 
 #' @export
-setGeneric("plotHeatMap", function(object, covariates=TRUE ){standardGeneric("PlotHeatMap")})
+setGeneric("plotHeatMap", function(object, covariates=TRUE ){standardGeneric("plotHeatMap")})
 
 
 

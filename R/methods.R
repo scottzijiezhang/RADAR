@@ -827,6 +827,7 @@ setMethod( "diffIP_parallel", signature("MeRIP.RADAR"), function(object, exclude
     all.id <- which(! 1:nrow(all1) %in% error.id )
     rownames(all1) <- rownames(allY)[all.id] ## assign window names to test statistics
     
+    all.est <- all1
     colnames(all.est) <- gsub("3","",colnames(all.est))
   }
   
@@ -1075,7 +1076,7 @@ setMethod("results", signature("MeRIP.RADAR"), function(object){
 
 #' @export
 #' @name plotHeatMap
-#' @title plot Heat Map
+#' @title plotHeatMap
 #' @description Plot heat map of methylation variations across samples been analyzed.
 #' @param object The MeRIP.RADAR object.
 #' @param covariates Logic parameter. Whether to regress out covariates (if variable has been set to have more than one column). Default is TRUE.
@@ -1119,7 +1120,7 @@ setMethod("plotHeatMap", signature("MeRIP.RADAR"), function(object, covariates=T
     }
     
   }else if(nrow(object@mergedBins)> 1){
-    stop("Please use reportResult(MeRIP.Peak) function to report significant bins at a cutoff you set (or by default FDR<0.1 & Log fold change > 0.5)!\n")
+    stop("Please use reportResult(MeRIP.RADAR) function to report significant bins at a cutoff you set (or by default FDR<0.1 & Log fold change > 0.5)!\n")
   }else{
     stop("No inferential test has been performed!\n")
   }
