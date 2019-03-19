@@ -67,7 +67,7 @@ DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLi
   }
   
   # get differential expression results
-  res <- results(dds)
+  res <- DESeq2::results(dds)
   
   # merge data and output
   res.DESeq2 = data.frame(GeneID=rownames(res),log2FC=round(res$log2FoldChange,digits=2),p.adjust=res$padj, pvalue=signif(res$pvalue,digits=3))

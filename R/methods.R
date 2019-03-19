@@ -277,6 +277,7 @@ setMethod("adjustExprLevel", signature("MeRIP.RADAR"), function(object, adjustBy
   if( nrow(object@norm.ip)<0 ){
     stop("Please normalize library size before running expression level adjustment!")
   }else if(adjustBy == "geneSum"){
+    cat("Adjusting expression level using Input geneSum read count...\n")
     geneSum <- geneExpression(object)
     geneSum <- t(apply(geneSum,1,.noZero))
     gene.size <- t( apply(geneSum,1,function(x){x/mean(x)}) )
@@ -286,11 +287,12 @@ setMethod("adjustExprLevel", signature("MeRIP.RADAR"), function(object, adjustBy
     object@ip_adjExpr <- ip_norm_geneSum
     return(object)
   }else if(adjustBy == "pos"){
-    norm.input <- t(apply(norm.input,1,.noZero))
+    cat("Adjusting expression level using Input bin-level read count...\n")
+    norm.input <- t(apply(object@norm.input,1,.noZero))
     pos.size <-  t( apply(norm.input,1,function(x){x/mean(x)}) )
     ip_norm_pos <- object@norm.ip/pos.size
     ip_norm_pos <- round(ip_norm_pos)
-    object@jointPeak_adjExpr <- ip_norm_pos
+    object@ip_adjExpr <- ip_norm_pos
     return(object)
   }else{
     stop("Must specify adjustBy = \"geneSum\" or by \"pos\"...")
@@ -968,19 +970,14 @@ setMethod("select", signature("MeRIP.RADAR"),function(object , samples ){
                bamPath.ip = IP.files(object)[id],
                samplenames = samplenames(object)[id],
                geneBins = geneBins(object),
-               GTF = object@GTF,
-               peakCalling = object@peakCalling,
-               jointPeak_threshold = object@jointPeak_threshold,
-               test.method = object@test.method ,
-               jointPeak_id_pairs = object@jointPeak_id_pairs,
-               jointPeaks = object@jointPeaks
+               GTF = object@GTF
   )
   
   newOb@geneSum <- if( nrow(object@geneSum) > 1 ){object@geneSum[,id]}else{object@geneSum}
-  newOb@peakCallResult <- if(nrow(object@peakCallResult) > 1){object@peakCallResult[,id]}else{object@peakCallResult}
-  newOb@jointPeak_ip <- if(nrow(object@jointPeak_ip) > 1 ){object@jointPeak_ip[,id]}else{object@jointPeak_ip}
-  newOb@jointPeak_input <- if(nrow(object@jointPeak_input) > 1 ){object@jointPeak_ip[,id]}else{object@jointPeak_input}
-  newOb@norm.jointPeak_ip <- if(nrow(object@norm.jointPeak_ip) > 1 ){object@norm.jointPeak_ip[,id]}else{object@norm.jointPeak_ip}
+  newOb@norm.input <- if(nrow(object@norm.input) > 1){object@norm.input[,id]}else{object@norm.input}
+  newOb@norm.ip <- if(nrow(object@norm.ip) > 1){object@norm.ip[,id]}else{object@norm.ip}
+  newOb@ip_adjExpr <- if(nrow(object@ip_adjExpr) > 1 ){object@ip_adjExpr[,id]}else{object@ip_adjExpr}
+  newOb@ip_adjExpr_filtered <- if(nrow(object@ip_adjExpr_filtered) > 1 ){object@ip_adjExpr_filtered[,id]}else{object@ip_adjExpr_filtered}
   newOb@sizeFactor <- if(nrow(object@sizeFactor) > 1 ){object@sizeFactor[id,]}else{object@sizeFactor}
   newOb@variate <- if(nrow(object@variate) > 1 ){ if(ncol(object@variate)>1){
     object@variate[id,]
@@ -991,7 +988,6 @@ setMethod("select", signature("MeRIP.RADAR"),function(object , samples ){
   } }else{
     object@variate
     }
-  newOb@jointPeak_adjExpr <- if(nrow(object@jointPeak_adjExpr) > 1 ){object@jointPeak_adjExpr[,id]}else{object@jointPeak_adjExpr}
   if(nrow(object@test.est) > 1 ){cat("Inferential test is not inherited because test result changes when samples are subsetted!\nPlease re-do test.\n")}
   return(newOb)
 })
