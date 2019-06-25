@@ -27,25 +27,25 @@ DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLi
   countdata.sel = countdata[rowSums(countdata)>0,]
   
   ## start analysis
-  conditions<-factor(as.matrix(pheno))
+  predictor <-factor(as.matrix(pheno))
   
   # create a coldata frame and instantiate the DESeqDataSet
   
   
   if(is.null(covariates)){
     print("without pc ...")
-    coldata <- data.frame(row.names=colnames(countdata.sel), conditions)
-    dds <- DESeqDataSetFromMatrix(countData=countdata.sel, colData=coldata, design=~conditions)
+    coldata <- data.frame(row.names=colnames(countdata.sel), predictor)
+    dds <- DESeqDataSetFromMatrix(countData=countdata.sel, colData=coldata, design=~predictor)
   }else{
     print("with pc ...")
     print(dim(covariates))
-    coldata <- data.frame(row.names=colnames(countdata.sel), conditions, covariates)
-    #coldata <- data.frame(conditions, covariates)
+    coldata <- data.frame(row.names=colnames(countdata.sel), predictor, covariates)
+    #coldata <- data.frame(predictor, covariates)
     #rownames(coldata) <- as.character(colnames(countdata.sel))
     #print(head(coldata))
     names <- colnames(covariates)
     
-    Formula <- formula(paste("~ conditions+", paste(names, collapse="+") ) )
+    Formula <- formula(paste("~ predictor+", paste(names, collapse="+") ) )
     dds <- DESeqDataSetFromMatrix(countData=countdata.sel, colData=coldata, design=Formula )
   }
   
@@ -66,9 +66,10 @@ DESeq2 <- function(countdata, pheno, covariates=NULL, Dispplot=FALSE,normalizeLi
     dev.off()
   }
   
+  print(design(dds))
   # get differential expression results
-  res <- DESeq2::results(dds)
-  
+  res <- DESeq2::results(dds, contrast = c("predictor","1","0") )
+  print(paste("returning test result for variable \"condition\" "))
   # merge data and output
   res.DESeq2 = data.frame(GeneID=rownames(res),log2FC=round(res$log2FoldChange,digits=2),p.adjust=res$padj, pvalue=signif(res$pvalue,digits=3))
   

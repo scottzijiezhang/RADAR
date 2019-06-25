@@ -105,10 +105,10 @@ plotGeneCoverageSplit <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, ge
     size.IP.adj <- size.IP*adjustExprLevel
     registerDoParallel( length(levels(X)) )
     INPUT.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
-      getAveCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT.adj[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
+      getAllCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT.adj[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
     }
     IP.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
-      getAveCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP.adj[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
+      getAllCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP.adj[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
     }
     rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
     
