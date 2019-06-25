@@ -98,12 +98,12 @@ setGeneric("geneExpressionTMP",function(object, meanFragmentLength = 150, normal
 })
 
 #' @export
-setGeneric("diffIP",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "qvalue" ){
+setGeneric("diffIP",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "fdr" ){
   standardGeneric("diffIP")
 })
 
 #' @export
-setGeneric("diffIP_parallel",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "qvalue", thread){
+setGeneric("diffIP_parallel",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "fdr", thread){
   standardGeneric("diffIP_parallel")
 })
 
