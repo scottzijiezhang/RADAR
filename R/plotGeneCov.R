@@ -104,20 +104,20 @@ plotGeneCoverageSplit <- function(IP_BAMs, INPUT_BAMs, size.IP, size.INPUT,X, ge
     size.INPUT.adj <- size.INPUT*adjustExprLevel
     size.IP.adj <- size.IP*adjustExprLevel
     registerDoParallel( length(levels(X)) )
-    INPUT.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+    INPUT.cov <- foreach(ii = unique(X),.combine = cbind)%dopar%{
       getAllCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT.adj[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
     }
-    IP.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+    IP.cov <- foreach(ii = unique(X),.combine = cbind)%dopar%{
       getAllCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP.adj[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
     }
     rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
     
   }else{
     registerDoParallel( length(levels(X)) )
-    INPUT.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+    INPUT.cov <- foreach(ii = unique(X),.combine = cbind)%dopar%{
       getAllCoverage(geneModel= geneModel,bamFiles = INPUT_BAMs[X==ii],geneName = geneName,size.factor = size.INPUT[X==ii], libraryType = libraryType, center = center,ZoomIn = ZoomIn)
     }
-    IP.cov <- foreach(ii = levels(X),.combine = cbind)%dopar%{
+    IP.cov <- foreach(ii = unique(X),.combine = cbind)%dopar%{
       getAllCoverage(geneModel= geneModel,bamFiles = IP_BAMs[X==ii],geneName = geneName,size.factor = size.IP[X==ii], libraryType = libraryType, center = center, ZoomIn = ZoomIn)
     }
     rm(list=ls(name=foreach:::.foreachGlobals), pos=foreach:::.foreachGlobals)
