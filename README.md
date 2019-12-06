@@ -12,4 +12,4 @@ Depends: Rsamtools, GenomicFeatures (>= 1.14.5), BH, Rcpp
 
 ### How to use
 
-Please see the manual page for more details [here](https://scottzijiezhang.github.io/RADARmannual/)
+Please see the manual page for more details [here](https://scottzijiezhang.github.io/RADARmanual/)
