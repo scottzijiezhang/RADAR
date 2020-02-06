@@ -98,7 +98,7 @@ setGeneric("geneExpressionTMP",function(object, meanFragmentLength = 150, normal
 })
 
 #' @export
-setGeneric("diffIP",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "fdr" ){
+setGeneric("diffIP",function(object,  exclude = NULL, maxPsi = 100, fdrBy = "fdr", steps = 10, gamma = 0.5, down = 0.1 ){
   standardGeneric("diffIP")
 })
 

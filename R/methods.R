@@ -647,7 +647,7 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
 #' @param object The MeRIP.RADAR object
 #' @param fdrBy The method to control for false discovery rate. The default is "qvalue", can also be "fdr".
 #' @export
-setMethod( "diffIP", signature("MeRIP.RADAR"), function(object, exclude = NULL, maxPsi = 100, fdrBy = "fdr"){
+setMethod( "diffIP", signature("MeRIP.RADAR"), function(object, exclude = NULL, maxPsi = 100, fdrBy = "fdr", steps = 10, gamma = 0.5, down = 0.1){
   
   if( nrow(object@variate) != length(object@samplenames)  ){
     stop(" Predictor variable lengthen needs to match the sample size! If you haven't set the predictor variable, please set it by variable(object) <- data.frmae(group = c(...)) ")
@@ -685,7 +685,7 @@ setMethod( "diffIP", signature("MeRIP.RADAR"), function(object, exclude = NULL, 
       coef <- model1$coefficients
       mu2 <- coef[1]
       beta <- coef[2]
-      est <- try(unlist(PoissionGamma(Y, X, beta, psi, mu2, gamma = 0.75, steps = 50, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma(Y, X, beta, psi, mu2, gamma = gamma, steps = steps, down = down,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all.est <- rbind(all.est, est)
         all.id <- c(all.id, kk)
@@ -709,7 +709,7 @@ setMethod( "diffIP", signature("MeRIP.RADAR"), function(object, exclude = NULL, 
       aa <- unlist(summary( lm( design.multiBeta, data = as.data.frame(cbind(Y, X.all)) ) )$coefficients[, 1])
       mu2 <- aa[1]
       beta <- aa[2:(ncol(X.all)+1 )]
-      est <- try(unlist(PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = 0.25, steps = 25, down = 0.1,psi_cutoff = maxPsi)))
+      est <- try(unlist(PoissionGamma_multiple_beta(Y, X.all, beta, psi, mu2, gamma = gamma, steps = steps, down = down,psi_cutoff = maxPsi)))
       if(class(est) != "try-error"){
         all.est <- rbind(all.est, est)
         all.id <- c(all.id, kk)
@@ -948,6 +948,7 @@ setMethod("select", signature("MeRIP"),function(object , samples ){
                GTF = object@GTF)
   
   newOb@geneSum <- if( nrow(object@geneSum) > 1 ){object@geneSum[,id]}else{object@geneSum}
+  return(newOb)
 })
 
 
@@ -1127,3 +1128,22 @@ setMethod("plotHeatMap", signature("MeRIP.RADAR"), function(object, covariates=T
     stop("No inferential test has been performed!\n")
   }
 })
+
+###########################################################
+
+.reportPeaks <- function(radar, est , cutoff = 0.1, Beta_cutoff = 0.5, threads = 1){
+  stats <- est
+  
+  colnames(stats) <- gsub("fdr","padj",colnames(stats))
+  colnames(stats) <- gsub("log2.OR","beta",colnames(stats))
+  colnames(stats) <- gsub("logFC","beta",colnames(stats))
+  colnames(stats) <- gsub("log2.OR","beta",colnames(stats))
+  
+  num_bins <- length( which(stats[,"fdr"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff) )
+  if(num_bins < 1 ){
+    stop("There is no bin passing the threshold...\n No differential peaks can be reported at current cutoff...")
+  }else {
+    sig.bins <- rownames(stats)[which(stats[,"fdr"] < cutoff & abs(stats[,"beta"] )> Beta_cutoff)]
+  }
+  
+}

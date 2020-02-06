@@ -913,7 +913,7 @@ arma::vec gradient_descent_multiple_beta_psi_mu2(arma::vec Y, arma::mat X, arma:
 
     beta = beta_prime; psi = psi_prime; mu2 = mu2_prime;
     Xbeta = X*beta;
-    gradient = gradient_multiple_beta_psi_mu2(Y, X, Xbeta, psi, mu2, n, k);
+  //  gradient = gradient_multiple_beta_psi_mu2(Y, X, Xbeta, psi, mu2, n, k);
     ll = LogLikelihood_multiple_beta_psi_mu2(Y, Xbeta, psi, mu2, n, sum_log_factorial_Y);
 
   }

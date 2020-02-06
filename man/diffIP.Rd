@@ -6,7 +6,7 @@
 \title{Perform inferential test using Poisson Random effect model in RADAR}
 \usage{
 \S4method{diffIP}{MeRIP.RADAR}(object, exclude = NULL, maxPsi = 100,
-  fdrBy = "qvalue")
+  fdrBy = "fdr", steps = 10, gamma = 0.5, down = 0.1)
 }
 \arguments{
 \item{object}{The MeRIP.RADAR object}
