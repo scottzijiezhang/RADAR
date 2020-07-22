@@ -458,7 +458,7 @@ setMethod("plotGeneCov", signature("MeRIP.RADAR"), function(object, geneName, li
                    geneName = geneName,
                    geneModel = object@geneModel,
                    libraryType = libraryType, center = center  ,GTF = object@GTF, ZoomIn = ZoomIn, adjustExprLevel = adj, Names = samplenames(object)  )+
-    theme(plot.title = element_text(hjust = 0.5,size = 18,face = "bold"),legend.title =  element_text(hjust = 0.5,size = 15,face = "bold"),legend.text =  element_text(size = 13.5,face = "bold"))
+    theme(plot.title = element_text(hjust = 0.5,size = 18,color = "black"),legend.title =  element_text(hjust = 0.5,size = 15,color = "black"),legend.text =  element_text(size = 13.5,color = "black"))
   }else{
     plotGeneCoverage(IP_BAMs = IP.files(object),
                    INPUT_BAMs =Input.files(object),
@@ -468,7 +468,7 @@ setMethod("plotGeneCov", signature("MeRIP.RADAR"), function(object, geneName, li
                    geneName = geneName,
                    geneModel = object@geneModel,
                    libraryType = libraryType, center =  center  ,GTF = object@GTF,ZoomIn =  ZoomIn,adjustExprLevel =  adj )+
-    theme(plot.title = element_text(hjust = 0.5,size = 18,face = "bold"),legend.title =  element_text(hjust = 0.5,size = 15,face = "bold"),legend.text =  element_text(size = 13.5,face = "bold"))
+    theme(plot.title = element_text(hjust = 0.5,size = 18,color = "black"),legend.title =  element_text(hjust = 0.5,size = 15,color = "black"),legend.text =  element_text(size = 13.5,color = "black"))
   }
   
 }else{
@@ -482,7 +482,7 @@ setMethod("plotGeneCov", signature("MeRIP.RADAR"), function(object, geneName, li
                           geneName = geneName,
                           geneModel = object$geneModel,
                           libraryType = libraryType, center = center, GTF =  object@GTF ,ZoomIn = ZoomIn, adjustExprLevel = adj,  Names = samplenames(object)  )+
-      theme(plot.title = element_text(hjust = 0.5,size = 18,face = "bold"),legend.position="none" )
+      theme(plot.title = element_text(hjust = 0.5,size = 18,color = "black"),legend.position="none" )
     
   }else{
     plotGeneCoverage(IP_BAMs = IP.files(object),
@@ -493,7 +493,7 @@ setMethod("plotGeneCov", signature("MeRIP.RADAR"), function(object, geneName, li
                    geneName = geneName,
                    geneModel = object$geneModel,
                    libraryType = libraryType, center =  center, GTF = object@GTF ,ZoomIn = ZoomIn, adjustExprLevel = adj  )+
-    theme(plot.title = element_text(hjust = 0.5,size = 18,face = "bold"),legend.position="none" )
+    theme(plot.title = element_text(hjust = 0.5,size = 18,color = "black"),legend.position="none" )
   }
  
   
@@ -570,7 +570,7 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
       temp_melt$Group[grep(unique(group)[i],temp_melt$variable)] <- unique(group)[i]
     }
     
-    axis.font <- element_text(face = "bold", color = "black")
+    axis.font <- element_text( color = "black")
     if(facet_grid){
       ggplot(temp_melt, aes(x= Group,y=value,fill=Group))+geom_boxplot()+labs(x="Gene Symbol",y="Log TPM")+facet_grid(.~ name)+
         theme(axis.title =axis.font, axis.text = axis.font)+
@@ -578,12 +578,12 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black",size = 1),
                            axis.title.x=element_blank(),
-                           axis.title.y=element_text(size=20, face="bold", vjust=0.5, angle=90,family = "arial"),
-                           legend.title=element_text(size = 15,face = "bold"),legend.text = element_text(size = 18, face = "bold",family = "arial"),
-                           axis.text.x =element_blank() ,axis.text.y = element_text(size = 15,face = "bold",family = "arial"),
-                           plot.title = element_text(size=22, face="bold", hjust=0.5,vjust=0.5,family = "arial"),
+                           axis.title.y=element_text(size=20, color = "black", vjust=0.5, angle=90 ),
+                           legend.title=element_text(size = 15,color = "black"),legend.text = element_text(size = 18, color = "black" ),
+                           axis.text.x =element_blank() ,axis.text.y = element_text(size = 15,color = "black" ),
+                           plot.title = element_text(size=22, color = "black", hjust=0.5,vjust=0.5 ),
                            axis.ticks.x = element_blank(),
-                           strip.text.x = element_text(size = 15,face = "bold") )+
+                           strip.text.x = element_text(size = 15,color = "black") )+
         ggtitle("Gene expression level")
     }else{
       ggplot(temp_melt, aes(x=name,y=value,fill=Group))+geom_boxplot()+labs(x="Gene Symbol",y="Log TPM")+
@@ -591,11 +591,11 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
         theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black",size = 1),
-                           axis.title.x=element_text(size=20, face="bold", hjust=0.5,family = "arial"),
-                           axis.title.y=element_text(size=20, face="bold", vjust=0.5, angle=90,family = "arial"),
-                           legend.title=element_text(size = 15,face = "bold"),legend.text = element_text(size = 18, face = "bold",family = "arial"),
-                           axis.text.x = element_text(size = 15,face = "bold",family = "arial",colour = "black") ,axis.text.y = element_text(size = 15,face = "bold",family = "arial"),
-                           plot.title = element_text(size=22, face="bold", hjust=0.5,vjust=0.5,family = "arial"))+
+                           axis.title.x=element_text(size=20, color = "black", hjust=0.5 ),
+                           axis.title.y=element_text(size=20, color = "black", vjust=0.5, angle=90 ),
+                           legend.title=element_text(size = 15,color = "black"),legend.text = element_text(size = 18, color = "black" ),
+                           axis.text.x = element_text(size = 15,color = "black" ) ,axis.text.y = element_text(size = 15,color = "black" ),
+                           plot.title = element_text(size=22, color = "black", hjust=0.5,vjust=0.5 ))+
         ggtitle("Gene expression level")
     }
     
@@ -607,7 +607,7 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
     for(i in 2:length(group)){
       temp_melt$Group[grep(unique(group)[i],temp_melt$variable)] <- unique(group)[i]
     }
-    axis.font <- element_text(face = "bold", color = "black")
+    axis.font <- element_text( color = "black")
     if(facet_grid){
       ggplot(temp_melt, aes(x=name,y=value,fill=Group))+geom_boxplot()+labs(x="Gene Symbol",y="TPM")+facet_grid(.~ name)+
         theme(axis.title =axis.font, axis.text = axis.font)+
@@ -615,12 +615,12 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black",size = 1),
                            axis.title.x=element_blank(),
-                           axis.title.y=element_text(size=20, face="bold", vjust=0.5, angle=90,family = "arial"),
-                           legend.title=element_text(size = 15,face = "bold"),legend.text = element_text(size = 18, face = "bold",family = "arial"),
-                           axis.text.x = element_blank() ,axis.text.y = element_text(size = 15,face = "bold",family = "arial"),
-                           plot.title = element_text(size=22, face="bold", hjust=0.5,vjust=0.4,family = "arial"),
+                           axis.title.y=element_text(size=20, color = "black", vjust=0.5, angle=90 ),
+                           legend.title=element_text(size = 15,color = "black"),legend.text = element_text(size = 18, color = "black" ),
+                           axis.text.x = element_blank() ,axis.text.y = element_text(size = 15,color = "black" ),
+                           plot.title = element_text(size=22, color = "black", hjust=0.5,vjust=0.4 ),
                            axis.ticks.x = element_blank(),
-                           strip.text.x = element_text(size = 15,face = "bold") )+
+                           strip.text.x = element_text(size = 15,color = "black") )+
         ggtitle("Gene expression level")
     }else{
       ggplot(temp_melt, aes(x=name,y=value,fill=Group))+geom_boxplot()+labs(x="Gene Symbol",y="TPM")+
@@ -628,11 +628,11 @@ plotTPM <- function(TPM,geneName,group,logCount = FALSE, facet_grid = FALSE){
         theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black",size = 1),
-                           axis.title.x=element_text(size=20, face="bold", hjust=0.5,family = "arial"),
-                           axis.title.y=element_text(size=20, face="bold", vjust=0.5, angle=90,family = "arial"),
-                           legend.title=element_text(size = 15,face = "bold"),legend.text = element_text(size = 18, face = "bold",family = "arial"),
-                           axis.text.x = element_text(size = 15,face = "bold",family = "arial",colour = "black") ,axis.text.y = element_text(size = 15,face = "bold",family = "arial"),
-                           plot.title = element_text(size=22, face="bold", hjust=0.5,vjust=0.4,family = "arial"))+
+                           axis.title.x=element_text(size=20, color = "black", hjust=0.5 ),
+                           axis.title.y=element_text(size=20, color = "black", vjust=0.5, angle=90 ),
+                           legend.title=element_text(size = 15,color = "black"),legend.text = element_text(size = 18, color = "black" ),
+                           axis.text.x = element_text(size = 15,color = "black" ,colour = "black") ,axis.text.y = element_text(size = 15,color = "black" ),
+                           plot.title = element_text(size=22, color = "black", hjust=0.5, vjust=0.4 ) )+
         ggtitle("Gene expression level")
     }
     
@@ -1052,8 +1052,8 @@ setMethod("peakDistribution", signature("MeRIP.RADAR"), function(object){
   distr <- data.frame(Annotation = factor(c("5'UTR","CDS","3'UTR", "ncRNA"),levels = c("5'UTR","CDS","3'UTR", "ncRNA")),
                       fraction = pct)
   ggplot(distr,aes( x = factor(1), y = fraction, fill = Annotation)) + geom_bar(width = 1,stat = "identity") +coord_polar( theta = "y")+theme_minimal()+
-    theme(axis.title = element_blank(), axis.text = element_blank(),axis.title.y = element_blank(),panel.grid=element_blank(), legend.title = element_text(face = "bold"),legend.text = element_text(face = "bold")) + 
-    geom_text(aes(y = rev( fraction/2 + c(0, cumsum(fraction)[-length(fraction)])),label = lbls), size=4, family = "bold")
+    theme(axis.title = element_blank(), axis.text = element_blank(),axis.title.y = element_blank(),panel.grid=element_blank(), legend.title = element_text(color = "black"),legend.text = element_text(color = "black")) + 
+    geom_text(aes(y = rev( fraction/2 + c(0, cumsum(fraction)[-length(fraction)])),label = lbls), size=4 )
 })
 
 #############################################################################################################################

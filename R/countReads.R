@@ -34,6 +34,7 @@ countReads<-function(
   bamPath.IP = paste(bamFolder,"/",samplenames,".",modification,".bam",sep="")
   no.samples = length(samplenames)
   
+  ## Check for missing files and index bam files
   if( !all(file.exists(bamPath.input)) ) stop( "input bam file missing!!!" )
   if( !all(file.exists(bamPath.IP)) ) stop( "IP bam file missing!!!" )
   num_bam_files <- length(bamPath.input)
@@ -50,8 +51,7 @@ countReads<-function(
     }
   }
   
-  ## create output directory
-  dir.create(outputDir, showWarnings = FALSE, recursive = TRUE)
+
   
   ## This step removes ambiguous annotations and returns gene model
   cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
@@ -141,6 +141,8 @@ countReads<-function(
   
   data.out <- MeRIP(reads = reads, binSize = binSize, gtf = gtf, geneModel = geneGRList, bamPath.input = bamPath.input, bamPath.ip = bamPath.IP, samplenames = samplenames)
   if(saveOutput){
+    ## create output directory
+    dir.create(outputDir, showWarnings = FALSE, recursive = TRUE)
     saveRDS(data.out,paste0(outputDir,"/MeRIP_readCounts.RDS"))
   }
   

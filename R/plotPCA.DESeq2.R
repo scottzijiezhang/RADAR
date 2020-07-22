@@ -39,9 +39,9 @@ plotPCAfromMatrix <- function(m,group,loglink = TRUE){
   ggplot(data = pca.df,aes(PC1,PC2,label = rownames(pca.df),colour=group) )+geom_text()+ xlab(makeLab(props[1],1)) + ylab(makeLab(props[2],2))+
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                        panel.grid.minor = element_blank(),axis.line = element_line(colour = "black",size = 1),
-                       axis.title.x=element_text(size=20, hjust=0.5,family = "arial"),
-                       axis.title.y=element_text(size=20, vjust=0.4, angle=90,family = "arial"),
-                       legend.title=element_text(size = 15),legend.text = element_text(size = 18, family = "arial"),
-                       axis.text.x = element_text(size = 15,color = "black",family = "arial") ,axis.text.y = element_text(size = 15,family = "arial")  )
+                       axis.title.x=element_text(size=20, hjust=0.5),
+                       axis.title.y=element_text(size=20, vjust=0.4, angle=90),
+                       legend.title=element_text(size = 15),legend.text = element_text(size = 18),
+                       axis.text.x = element_text(size = 15,color = "black") ,axis.text.y = element_text(size = 15)  )
 
 }
