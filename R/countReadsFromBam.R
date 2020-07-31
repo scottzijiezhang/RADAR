@@ -6,7 +6,7 @@
       ba = scanBam(bam, param=ScanBamParam( which=which, what =c("pos","strand","qwidth","isize"), flag = scanBamFlag(isProperPair = T,isSecondMateRead = F) ) )
       ba = data.frame( pos = ba[[1]]$pos, strand = ba[[1]]$strand ,readLength = ba[[1]]$qwidth, isize = ba[[1]]$isize )
       ba = ba[ ba$pos > left, ]
-      ba = ba[ba$strand == reads.strand, ] ## filter for strand
+      ba = ba[ba$strand == reads.strand | reads.strand == "*", ] ## filter for strand
       ba$pos = DNA2RNA[ba$pos - left] ## convert mapped read pos into RNA position
       ba = ba[ ba$pos > 0, ] ## drop intron reads.
       ##shift the read pos to the center of the reads
@@ -22,7 +22,7 @@
       ba = scanBam(bam, param=ScanBamParam( which=which, what =c("pos","strand","qwidth") ) )
       ba = data.frame( pos = ba[[1]]$pos, strand = ba[[1]]$strand, readLength = ba[[1]]$qwidth )
       ba = ba[ ba$pos > left, ]
-      ba = ba[ba$strand == reads.strand, ] ## filter for strand
+      ba = ba[ba$strand == reads.strand | reads.strand == "*", ] ## filter for strand
       ba$pos = DNA2RNA[ba$pos - left] ## convert mapped read pos into RNA position
       ba = ba[ ba$pos > 0, ] ## drop intron reads.
       ##shift the read pos to the center of the reads

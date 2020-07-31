@@ -10,7 +10,8 @@ MeRIP <- setClass("MeRIP",
                          samplenames = "character",
                          geneBins = "data.frame",
                          geneSum = "matrix",
-                         GTF = "GRanges"
+                         GTF = "GRanges",
+                         mode = "character"
                          ),
          validity = function(object){
            errors <- character()
@@ -46,7 +47,7 @@ MeRIP <- setClass("MeRIP",
            
            if (length(errors) == 0) TRUE else errors
          },
-         prototype(geneBins = data.frame(gene = character(), bin = character() ), geneSum = matrix(),GTF = GRanges())
+         prototype(geneBins = data.frame(gene = character(), bin = character() ), geneSum = matrix(),GTF = GRanges(), mode = "mRNA")
          )
 
 ## The extended class of MeRIP that is suitable for RADAR pipeline.

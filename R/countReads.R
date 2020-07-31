@@ -58,6 +58,12 @@ countReads<-function(
   geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
   cat("Gene model obtained from gtf file...\n")
   
+  ## Check BAM headers and remove chr in geneModel that is not in BAM file. 
+  bamHeader <- scanBamHeader(bamPath.input, what=c("targets") )
+  seqLevels <- unique( unlist( lapply( bamHeader, function(x) names( x$targets) ) ) )
+  geneGRList <- geneGRList[ unlist( runValue( seqnames( geneGRList ) ) ) %in% seqLevels ]
+  
+  
   no.genes=length(geneGRList)## define number of genes
   
   cat("counting reads for each genes, this step may takes a few hours....\n")
@@ -100,7 +106,7 @@ countReads<-function(
     }else if(strandToKeep == "same"){
       reads.strand = as.character(dna.range$strand)
     }else{
-      cat("Currently m6Amonter only support strand specific RNA-seq data.\nCounting reads at opposite strand by defalt...\n")
+      cat("Currently RADAR only support strand specific RNA-seq data.\nCounting reads at opposite strand by defalt...\n")
       reads.strand = character()
       if(dna.range$strand == "+"){reads.strand = "-"}else{reads.strand = "+"}
     }
