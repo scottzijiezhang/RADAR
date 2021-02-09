@@ -15,7 +15,12 @@
       no.window = length(sliding)
       windowCounts = vector(length = no.window)
       for(j in 1:no.window){
-        windowCounts[j]= sum( abs(sliding[j] - ba$pos) <= binSize/2 )
+        windowCounts[j]= sum( ba$pos >= sliding[j] &  ba$pos < (sliding[j] + binSize)  ) 
+      } # count regular bins
+      if( as.character( strand(which) ) == "+" ){
+        windowCounts[no.window] = windowCounts[no.window] + sum( ba$pos >=  (sliding[no.window] + binSize) & ba$pos <= max(DNA2RNA) ) #count the extra part of the last bin on positive strand
+      }else{
+        windowCounts[1] = windowCounts[1] + sum( ba$pos >=  (sliding[1] + binSize) & ba$pos <= (sliding[1] + binSize + max(DNA2RNA) %% binSize ) ) #count the extra part of the first bin on negative strand
       }
       
     }else{ # single-end sequence
@@ -31,8 +36,14 @@
       no.window = length(sliding)
       windowCounts = vector(length = no.window)
       for(j in 1:no.window){
-        windowCounts[j]= sum( abs(sliding[j] - ba$pos) <= binSize/2 )
+        windowCounts[j]= sum( ba$pos >= sliding[j] &  ba$pos < (sliding[j] + binSize)  ) 
+      } # count regular bins
+      if( as.character( strand(which) ) == "+" ){
+        windowCounts[no.window] = windowCounts[no.window] + sum( ba$pos >=  (sliding[no.window] + binSize) & ba$pos <= max(DNA2RNA) ) #count the extra part of the last bin on positive strand
+      }else{
+        windowCounts[1] = windowCounts[1] + sum( ba$pos >=  (sliding[1] + binSize) & ba$pos <= (sliding[1] + binSize + max(DNA2RNA) %% binSize ) ) #count the extra part of the first bin on negative strand
       }
+      
     }
     
     return(windowCounts)

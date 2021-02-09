@@ -33,7 +33,7 @@ setMethod("sizeFactors", signature("MeRIP.RADAR"), function(object){
 .peakExons <- function(peak,y){
   exonID <- peak$start <= y$end & peak$end >= y$start
   if(sum(exonID) == 1){
-    return(data.frame(start = peak$start, end = peak$end, width = peak$end - peak$start))
+    return(data.frame(start = peak$start, end = peak$end, width = peak$end - peak$start + 1))
   }else if(sum(exonID) > 1){
     peakexon <- y[exonID,]
     peakexon[1,"start"] <- peak$start
@@ -64,12 +64,13 @@ setMethod("sizeFactors", signature("MeRIP.RADAR"), function(object){
     pointer = pointer + df.geneModel$width[j]
   }
   RNA2DNA = RNA2DNA + dna.range$start -1 #back to chromosome coordinates
-  #creat center points of continuous window
-  if(exon.length <= binSize){
-    slidingStart= exon.length/2
-    mapping = data.frame(start = RNA2DNA[slidingStarts[1]-exon.length/2+1], end = RNA2DNA[slidingStarts[2] + exon.length/2]  )
-  }else{
-    mapping = data.frame(start = RNA2DNA[slidingStarts[1] - binSize/2 +1], end = RNA2DNA[slidingStarts[2] + binSize/2 ]  )
+  #create center points of continuous window
+  if(exon.length <= binSize | (dna.range$strand == "+" & slidingStarts[2] == ( exon.length - binSize - exon.length %% binSize + 1) ) ){ # for genes that is shorter than bin size || if it is the rightmost bin (buffer bin) to be retrieved (positive strand only)
+    mapping = data.frame(start = RNA2DNA[ slidingStarts[1] ], end = RNA2DNA[exon.length]  )
+  }else if( dna.range$strand == "-" & slidingStarts[2] == 1 ){ # when retrieve the leftmost (buffer) bin on reverse strand
+    mapping = data.frame(start = RNA2DNA[ slidingStarts[1] ], end = RNA2DNA[slidingStarts[2] + binSize + exon.length %% binSize - 1 ]  )
+  }else{ # retrieve regular bins
+    mapping = data.frame(start = RNA2DNA[ slidingStarts[1] ], end = RNA2DNA[slidingStarts[2] + binSize - 1 ] )
   }
   
   mapping$chr = as.character(dna.range$seqnames)
@@ -281,7 +282,7 @@ setMethod("adjustExprLevel", signature("MeRIP.RADAR"), function(object, adjustBy
     geneSum <- geneExpression(object)
     geneSum <- t(apply(geneSum,1,.noZero))
     gene.size <- t( apply(geneSum,1,function(x){x/mean(x)}) )
-    gene.size.factor <- gene.size[geneBins(object)[rownames(object@norm.ip),"gene"],]
+    gene.size.factor <- gene.size[as.character( geneBins(object)[rownames(object@norm.ip),"gene"] ) ,]
     ip_norm_geneSum <- object@norm.ip/gene.size.factor
     ip_norm_geneSum <- round(ip_norm_geneSum)
     object@ip_adjExpr <- ip_norm_geneSum
@@ -321,9 +322,9 @@ setMethod("filterBins", signature("MeRIP.RADAR"), function(object, minCountsCutO
   
   # organized group info
   X <- variable(object)[,1]
-  if(length(levels(X)) !=2 ){stop("The predictor variable must have two groups")}
-  group1 <- which(X==levels(X)[1])
-  group2 <- which(X==levels(X)[2])
+  if( length(levels( as.factor(X) ) ) !=2 ){stop("The predictor variable must have two groups")}
+  group1 <- which(X==levels( as.factor(X) )[1])
+  group2 <- which(X==levels( as.factor(X) )[2])
   ngroup1 <- length(group1)
   ngroup2 <- length(group2)
   
