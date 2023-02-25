@@ -26,6 +26,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Create conda env
+        shell: bash
+        run: conda create radar.yml
+      - name: Activate conda env
+        shell: bash
+        run: conda activate radar
+      - name: Setting
+        run: options(unzip = 'internal')
+        shell: Rscript {0}
       - name: Set up R ${{ matrix.r-version }}
         uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
         with:
