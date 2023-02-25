@@ -27,7 +27,8 @@ countReads<-function(
   paired = FALSE,
   threads = 1,
   saveOutput = FALSE,
-  geneGRList = FALSE
+  geneGRList = NULL,
+  run_gtfToGeneModel = FALSE
 ){
   
   ##read bam files
@@ -53,7 +54,7 @@ countReads<-function(
   }
   
 
-  if (!geneGRList){
+  if (run_gtfToGeneModel){
     ## This step removes ambiguous annotations and returns gene model
     cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
     geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
