@@ -26,7 +26,8 @@ countReads<-function(
   strandToKeep = "opposite",
   paired = FALSE,
   threads = 1,
-  saveOutput = FALSE
+  saveOutput = FALSE,
+  geneGRList = NULL
 ){
   
   ##read bam files
@@ -52,12 +53,13 @@ countReads<-function(
   }
   
 
-  
-  ## This step removes ambiguous annotations and returns gene model
-  cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
-  geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
-  cat("Gene model obtained from gtf file...\n")
-  
+  if (geneGRList==NULL){
+    ## This step removes ambiguous annotations and returns gene model
+    cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
+    geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
+    cat("Gene model obtained from gtf file...\n")
+  }
+
   ## Check BAM headers and remove chr in geneModel that is not in BAM file. 
   bamHeader <- scanBamHeader(bamPath.input, what=c("targets") )
   seqLevels <- unique( unlist( lapply( bamHeader, function(x) names( x$targets) ) ) )
