@@ -64,7 +64,7 @@ countReads<-function(
   ## Check BAM headers and remove chr in geneModel that is not in BAM file. 
   bamHeader <- scanBamHeader(bamPath.input, what=c("targets") )
   seqLevels <- unique( unlist( lapply( bamHeader, function(x) names( x$targets) ) ) )
-  geneGRList <- geneGRList[ uname(unlist( runValue( seqnames( geneGRList ) ) )) %in% seqLevels ]
+  geneGRList <- geneGRList[ unname(unlist( runValue( seqnames( geneGRList ) ) )) %in% seqLevels ]
   
   
   no.genes=length(geneGRList)## define number of genes
