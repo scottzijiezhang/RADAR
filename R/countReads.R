@@ -4,7 +4,7 @@
 #' @name countReads
 #' @title quantify reads in consecutive bins
 #' @param samplenames The names of each sample (prefix for bam files)
-#' @param gtf The gtf format gene annotation file
+#' @param annotation Path to gtf format gene annotation file OR user defined GRangesList object
 #' @param fragmentLength The RNA fragment length (insert size of the library).
 #' @param modification The middle file name used to differentiate IP sample from Input sample. This should correspond to the file name of BAM files. 
 #' For example, modification="m6A" for BAM files named as "samplenames.m6A.bam". 
@@ -17,7 +17,7 @@
 #' @export
 countReads<-function(
   samplenames,# file name of samples
-  gtf, # gtf file used for peak calling
+  annotation, # gtf file used for peak calling
   fragmentLength = 150,
   bamFolder,
   outputDir=NA,
@@ -26,9 +26,7 @@ countReads<-function(
   strandToKeep = "opposite",
   paired = FALSE,
   threads = 1,
-  saveOutput = FALSE,
-  geneGRList = NULL,
-  run_gtfToGeneModel = FALSE
+  saveOutput = FALSE
 ){
   
   ##read bam files
@@ -52,10 +50,13 @@ countReads<-function(
       indexBam(IPfile)
     }
   }
-  
 
-  if (run_gtfToGeneModel){
+  if (class(annotation) == 'CompressedGRangesList' | class(annotation) == 'GRangesList'){
+    gtf = ''
+    geneGRList = annotation
+  } else {
     ## This step removes ambiguous annotations and returns gene model
+    gtf = annotation
     cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
     geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
     cat("Gene model obtained from gtf file...\n")
