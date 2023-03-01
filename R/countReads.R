@@ -54,6 +54,7 @@ countReads<-function(
   if (class(annotation) == 'CompressedGRangesList' | class(annotation) == 'GRangesList'){
     gtf = ''
     geneGRList = annotation
+    cat("Using a user defined gene model...\n")
   } else {
     ## This step removes ambiguous annotations and returns gene model
     gtf = annotation
