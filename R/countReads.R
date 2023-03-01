@@ -79,7 +79,7 @@ countReads<-function(
   reads <- foreach(i = 1:no.genes, .combine = rbind) %dopar%{
     
     geneName = names(geneGRList)[i]
-    geneModel =reduce( geneGRList[geneName][[1]] )## merge overlapping exons
+    geneModel =GenomicRanges::reduce( geneGRList[geneName][[1]] )## merge overlapping exons
     
     # DNA location to gene location conversion
     df.geneModel= as.data.frame(geneModel) ##data frame of gene model
