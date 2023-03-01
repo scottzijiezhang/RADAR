@@ -45,7 +45,7 @@ setMethod("sizeFactors", signature("MeRIP.RADAR"), function(object){
 ## helper function
 .getPeakBins <- function(geneGRList,geneName,slidingStarts,binSize){
   
-  geneModel =reduce( geneGRList[geneName][[1]] )## merge overlapping exons
+  geneModel =GenomicRanges::reduce( geneGRList[geneName][[1]] )## merge overlapping exons
   
   # DNA location to gene location conversion
   df.geneModel= as.data.frame(geneModel) ##data frame of gene model
@@ -129,7 +129,7 @@ setMethod("reportResult", signature("MeRIP.RADAR"), function(object, cutoff = 0.
     cat(paste("Using",getDoParWorkers(),"thread(s) to report merged report...\n"))
     merged.report<- foreach( p = 1:num_peaks, .combine = rbind)%dopar%{
       peak_row_id <- peak_id_pairs[p,]
-      geneExons <- reduce ( geneGRList[peakGenes[p]][[1]] )
+      geneExons <- GenomicRanges::reduce ( geneGRList[peakGenes[p]][[1]] )
       
       peak <- .getPeakBins(geneGRList,peakGenes[p],c(geneBins$bin[peak_row_id[1]],geneBins$bin[peak_row_id[2]]),object@binSize )
       
@@ -1027,7 +1027,7 @@ setMethod("peakDistribution", signature("MeRIP.RADAR"), function(object){
   }
   
   ################
-  gr.peak <- reduce( makeGRangesFromDataFrame(x) )
+  gr.peak <- GenomicRanges::reduce( makeGRangesFromDataFrame(x) )
   txdb <- makeTxDbFromGFF(file = object@gtf,format = "gtf")
   
   cds <-  cdsBy(txdb,by = "tx")

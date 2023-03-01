@@ -229,9 +229,9 @@ getCov <- function(bf,locus, libraryType ){
 }
 
 .getGeneModelAnno <- function(geneModel,geneName,gtf_grange,zoomIn = NULL){
-  exon.current <- reduce( geneModel[geneName][[1]] )
-  startCodon <-  reduce( gtf_grange[gtf_grange$type == "start_codon" & gtf_grange$gene_id == geneName] )
-  stopCodon <- reduce( gtf_grange[gtf_grange$type == "stop_codon" & gtf_grange$gene_id == geneName] )
+  exon.current <- GenomicRanges::reduce( geneModel[geneName][[1]] )
+  startCodon <-  GenomicRanges::reduce( gtf_grange[gtf_grange$type == "start_codon" & gtf_grange$gene_id == geneName] )
+  stopCodon <- GenomicRanges::reduce( gtf_grange[gtf_grange$type == "stop_codon" & gtf_grange$gene_id == geneName] )
   if(as.logical(strand(exon.current)[1]=="-")){
     startCodon <- startCodon[which.max( start(startCodon) )]
     stopCodon <- stopCodon[which.min( start(stopCodon) )]
