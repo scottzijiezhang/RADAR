@@ -4,7 +4,7 @@
 #' @name countReads
 #' @title quantify reads in consecutive bins
 #' @param samplenames The names of each sample (prefix for bam files)
-#' @param gtf The gtf format gene annotation file
+#' @param annotation Path to gtf format gene annotation file OR user defined GRangesList object
 #' @param fragmentLength The RNA fragment length (insert size of the library).
 #' @param modification The middle file name used to differentiate IP sample from Input sample. This should correspond to the file name of BAM files. 
 #' For example, modification="m6A" for BAM files named as "samplenames.m6A.bam". 
@@ -17,7 +17,7 @@
 #' @export
 countReads<-function(
   samplenames,# file name of samples
-  gtf, # gtf file used for peak calling
+  annotation, # gtf file used for peak calling
   fragmentLength = 150,
   bamFolder,
   outputDir=NA,
@@ -50,18 +50,23 @@ countReads<-function(
       indexBam(IPfile)
     }
   }
-  
 
-  
-  ## This step removes ambiguous annotations and returns gene model
-  cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
-  geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
-  cat("Gene model obtained from gtf file...\n")
-  
+  if (class(annotation) == 'CompressedGRangesList' | class(annotation) == 'GRangesList'){
+    gtf = ''
+    geneGRList = annotation
+    cat("Using a user defined gene model...\n")
+  } else {
+    ## This step removes ambiguous annotations and returns gene model
+    gtf = annotation
+    cat("Reading gtf file to obtain gene model\nFilter out ambiguous model...\n")
+    geneGRList = gtfToGeneModel(gtf) #get the gene model in GRList with only single chromosome and strand.
+    cat("Gene model obtained from gtf file...\n")
+  }
+
   ## Check BAM headers and remove chr in geneModel that is not in BAM file. 
   bamHeader <- scanBamHeader(bamPath.input, what=c("targets") )
   seqLevels <- unique( unlist( lapply( bamHeader, function(x) names( x$targets) ) ) )
-  geneGRList <- geneGRList[ unlist( runValue( seqnames( geneGRList ) ) ) %in% seqLevels ]
+  geneGRList <- geneGRList[ unname(unlist( runValue( seqnames( geneGRList ) ) )) %in% seqLevels ]
   
   
   no.genes=length(geneGRList)## define number of genes
@@ -74,7 +79,7 @@ countReads<-function(
   reads <- foreach(i = 1:no.genes, .combine = rbind) %dopar%{
     
     geneName = names(geneGRList)[i]
-    geneModel =reduce( geneGRList[geneName][[1]] )## merge overlapping exons
+    geneModel =GenomicRanges::reduce( geneGRList[geneName][[1]] )## merge overlapping exons
     
     # DNA location to gene location conversion
     df.geneModel= as.data.frame(geneModel) ##data frame of gene model
